@@ -1,0 +1,81 @@
+# PLACE INDEX CACHE REGION
+
+jcs.region.placeIndex=
+jcs.region.placeIndex.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.placeIndex.cacheattributes.MaxObjects=3000
+jcs.region.placeIndex.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.placeIndex.elementattributes.IsEternal=false
+jcs.region.placeIndex.elementattributes.MaxLifeSeconds=28800
+
+# PLACE MATCH CACHE REGION
+
+jcs.region.placeMatch=
+jcs.region.placeMatch.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.placeMatch.cacheattributes.MaxObjects=3000
+jcs.region.placeMatch.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.placeMatch.elementattributes.IsEternal=false
+jcs.region.placeMatch.elementattributes.MaxLifeSeconds=28800
+
+# PLACE LATLNG CACHE REGION - MaxLifeSeconds in sync with with PlaceSearcher.php
+
+jcs.region.placeLatLng=
+jcs.region.placeLatLng.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.placeLatLng.cacheattributes.MaxObjects=10000
+jcs.region.placeLatLng.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.placeLatLng.elementattributes.IsEternal=false
+jcs.region.placeLatLng.elementattributes.MaxLifeSeconds=28800
+
+# PLACE AUTOCOMPLETE CACHE REGION
+
+jcs.region.placeAutoComplete=
+jcs.region.placeAutoComplete.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.placeAutoComplete.cacheattributes.MaxObjects=500
+jcs.region.placeAutoComplete.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.placeAutoComplete.elementattributes.IsEternal=false
+jcs.region.placeAutoComplete.elementattributes.MaxLifeSeconds=28800
+
+# SURNAME BOOST CACHE REGION
+
+jcs.region.surname=
+jcs.region.surname.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.surname.cacheattributes.MaxObjects=10000
+jcs.region.surname.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.surname.elementattributes.IsEternal=false
+jcs.region.surname.elementattributes.MaxLifeSeconds=28800
+
+# GIVENNAME BOOST CACHE REGION
+
+jcs.region.givenname=
+jcs.region.givenname.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.givenname.cacheattributes.MaxObjects=2000
+jcs.region.givenname.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.givenname.elementattributes.IsEternal=false
+jcs.region.givenname.elementattributes.MaxLifeSeconds=28800
+
+# STATS CACHE REGION
+
+jcs.region.stats=
+jcs.region.stats.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.stats.cacheattributes.MaxObjects=500
+jcs.region.stats.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.stats.elementattributes.IsEternal=false
+jcs.region.stats.elementattributes.MaxLifeSeconds=1800
+
+# NAME CANDIDATES CACHE REGION
+
+jcs.region.nameCandidates=
+jcs.region.nameCandidates.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.nameCandidates.cacheattributes.MaxObjects=1000
+jcs.region.nameCandidates.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.nameCandidates.elementattributes.IsEternal=false
+jcs.region.nameCandidates.elementattributes.MaxLifeSeconds=86400
+
+# PLACE REDIRECT CACHE REGION - USED BY INDEXER
+
+jcs.region.placeRedirect=
+jcs.region.placeRedirect.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.placeRedirect.cacheattributes.MaxObjects=80000
+jcs.region.placeRedirect.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.placeRedirect.elementattributes.IsEternal=false
+jcs.region.placeRedirect.elementattributes.MaxLifeSeconds=86400
+

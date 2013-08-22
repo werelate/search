@@ -1,0 +1,5 @@
+user= # can be left blank
+solr_hostname=localhost
+solr_port=8080
+data_dir=/mnt/index/data
+webapp_name=solr

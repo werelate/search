@@ -1,0 +1,7 @@
+.idea/*
+*.iml
+conf/scripts.conf
+conf/indexer.properties
+build/*
+dist/*
+classes/*

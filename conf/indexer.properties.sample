@@ -1,0 +1,9 @@
+max_index_seconds=280
+foreground_delay_millis=10
+background_delay_millis=20
+max_background_pages=0
+max_index_task_size=5000
+index_batch_size=50
+
+wiki_hostname=localhost
+index_url=http://localhost:8080/solr
