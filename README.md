@@ -18,4 +18,4 @@ To run the customized SOLR search engine:
 * copy `solr/apache-solr-3.1.0.war` to your webapps directory
 
 To run the indexer
-* run `shell/index.sh` periodically
+* run `bin/index.sh` periodically
