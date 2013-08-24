@@ -23,3 +23,8 @@ To run the customized SOLR search engine:
 
 To run the indexer
 * run `bin/index.sh` periodically
+
+Note
+----
+* This search project depends upon the Names project, which is in the middle of being revised. If you want to use this
+Search project in its current state, contact me directly at dallan werelate.org and I will walk you through it.
