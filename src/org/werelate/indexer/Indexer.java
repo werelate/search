@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.File;
 import java.sql.SQLException;
 
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.BinaryConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import org.apache.commons.cli.*;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -86,10 +88,8 @@ public class Indexer
       wikiHostname = properties.getProperty("wiki_hostname");
 
       // get a database connection
-      Properties userPassword = new Properties();
-      userPassword.load(new FileInputStream("/etc/wr/java.properties"));
-      conn = new DatabaseConnectionHelper(userPassword.getProperty("db_url"),
-                                          userPassword.getProperty("db_username"), userPassword.getProperty("db_passwd"));
+      conn = new DatabaseConnectionHelper(properties.getProperty("db_url"),
+                                          properties.getProperty("db_username"), properties.getProperty("db_passwd"));
       conn.connect();
 
       // Set up http client helpers
@@ -99,9 +99,9 @@ public class Indexer
       solr = new CommonsHttpSolrServer(indexUrl);
 
       // Set up redir cache
-      String memcacheHost = properties.getProperty("memcache_host", "localhost");
-      int memcachePort = Integer.parseInt(properties.getProperty("memcache_port", "11211"));
-      memcache = new MemcachedClient(new InetSocketAddress(memcacheHost, memcachePort));
+      String memcacheAddress = properties.getProperty("memcache_address");
+      memcache = new MemcachedClient(new BinaryConnectionFactory(),
+                                     AddrUtil.getAddresses(memcacheAddress));
 
       // Set up place standardizer
       placeStandardizer = new PlaceStandardizer(indexUrl, memcache, wikiHostname, wikiClient);

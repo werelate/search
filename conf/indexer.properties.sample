@@ -7,3 +7,7 @@ index_batch_size=50
 
 wiki_hostname=localhost
 index_url=http://localhost:8080/solr
+db_url=jdbc:mysql://localhost:3306/wikidb
+db_username=
+db_passwd=
+memcache_address=127.0.0.1:11211

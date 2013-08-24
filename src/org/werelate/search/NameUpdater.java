@@ -1,6 +1,5 @@
 package org.werelate.search;
 
-import org.apache.solr.handler.component.SearchComponent;
 import org.folg.names.search.Normalizer;
 import org.folg.names.search.Searcher;
 import net.spy.memcached.AddrUtil;
@@ -8,7 +7,6 @@ import net.spy.memcached.BinaryConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import org.werelate.util.Utils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -47,28 +45,18 @@ public class NameUpdater {
 
    public NameUpdater() {
       try {
-         Properties properties = new Properties();
-         properties.load(new FileInputStream("/etc/wr/java.properties"));
-         String memcacheHost = properties.getProperty("memcache_host", "localhost");
-         int memcachePort = Integer.parseInt(properties.getProperty("memcache_port", "11211"));
+         String memcacheAddress = System.getenv("memcache_address");
          memcachedClient = new MemcachedClient(new DaemonBinaryConnectionFactory(),
-                                               AddrUtil.getAddresses(memcacheHost+":"+memcachePort));
+                                               AddrUtil.getAddresses(memcacheAddress));
       } catch (IOException e) {
          logger.severe("Unable to initialize memcache client: "+e.getMessage());
          throw new RuntimeException(e);
       }
 
       // read url, userName, password
-      try {
-         Properties userPassword = new Properties();
-         userPassword.load(new FileInputStream("/etc/wr/java.properties"));
-         dbUrl = userPassword.getProperty("db_url");
-         dbUser = userPassword.getProperty("db_username");
-         dbPassword = userPassword.getProperty("db_passwd");
-      } catch (IOException e) {
-         logger.severe("Unable to read /etc/wr/java.properties: "+e.getMessage());
-         throw new RuntimeException(e);
-      }
+      dbUrl = System.getenv("db_url");
+      dbUser = System.getenv("db_username");
+      dbPassword = System.getenv("db_passwd");
 
       try {
          Class.forName("com.mysql.jdbc.Driver").newInstance();
