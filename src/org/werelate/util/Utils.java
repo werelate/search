@@ -71,6 +71,13 @@ public class Utils
    public static final String FLD_SPOUSE_GIVENNAME = "SpouseGivenname";
    public static final String FLD_PARENT_FAMILY_TITLE = "ParentFamilyTitle";
    public static final String FLD_SPOUSE_FAMILY_TITLE = "SpouseFamilyTitle";
+   public static final String FLD_PERSON_MARRIED_NAME = "PersonMarriedName";
+   public static final String FLD_PERSON_GIVENNAME_FACET = "PersonGivennameFacet";
+   public static final String FLD_PERSON_SURNAME_FACET = "PersonSurnameFacet";
+   public static final String FLD_PERSON_COUNTRY_FACET = "PersonCountryFacet";
+   public static final String FLD_PERSON_STATE_FACET = "PersonStateFacet";
+   public static final String FLD_PERSON_CENTURY_FACET = "PersonCenturyFacet";
+   public static final String FLD_PERSON_DECADE_FACET = "PersonDecadeFacet";
    public static final String FLD_PERSON_BIRTH_DATE_STORED = "PersonBirthDateStored";
    public static final String FLD_PERSON_CHR_DATE_STORED = "PersonChrDateStored";
    public static final String FLD_PERSON_DEATH_DATE_STORED = "PersonDeathDateStored";

@@ -167,24 +167,33 @@
        </analyzer>
      </fieldType>
 
-     <fieldType name="shorttext" class="solr.TextField" positionIncrementGap="10" omitNorms="true">
-       <analyzer type="index">
-         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-         <filter class="org.werelate.analysis.HtmlCharacterEntitiesFilterFactory"/>
-         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
-         <filter class="org.werelate.analysis.RomanizeFilterFactory"/>
-         <filter class="solr.LowerCaseFilterFactory"/>
-         <filter class="solr.StopFilterFactory" ignoreCase="false" words="stopwords.txt" enablePositionIncrements="true"/>
-       </analyzer>
-       <analyzer type="query">
-         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-         <filter class="org.werelate.analysis.HtmlCharacterEntitiesFilterFactory"/>
-         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
-         <filter class="org.werelate.analysis.RomanizeFilterFactory"/>
-         <filter class="solr.LowerCaseFilterFactory"/>
-         <filter class="solr.StopFilterFactory" ignoreCase="false" words="stopwords.txt" enablePositionIncrements="true"/>
-       </analyzer>
-     </fieldType>
+    <fieldType name="facettext" class="solr.TextField" positionIncrementGap="10" omitNorms="true">
+      <analyzer type="index">
+        <tokenizer class="solr.PatternTokenizerFactory" pattern="\|" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <fieldType name="shorttext" class="solr.TextField" positionIncrementGap="10" omitNorms="true">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="org.werelate.analysis.HtmlCharacterEntitiesFilterFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="org.werelate.analysis.RomanizeFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="false" words="stopwords.txt" enablePositionIncrements="true"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="org.werelate.analysis.HtmlCharacterEntitiesFilterFactory"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"/>
+        <filter class="org.werelate.analysis.RomanizeFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="false" words="stopwords.txt" enablePositionIncrements="true"/>
+      </analyzer>
+    </fieldType>
 
      <!-- use just for stored-only text fields; analyzer is used by highlighter to analyze stored data -->
      <fieldType name="hltext" class="solr.TextField" positionIncrementGap="1" omitNorms="true">
@@ -393,9 +402,16 @@
     <field name="MotherGivenname"  type="givenname" indexed="true"  stored="false" multiValued="true" />
     <field name="SpouseSurname"    type="surname"   indexed="true"  stored="false" multiValued="true" />
     <field name="SpouseGivenname"  type="givenname" indexed="true"  stored="false" multiValued="true" />
-    <field name="ParentFamilyTitle"      type="hltext" indexed="false" stored="true" multiValued="true" />
-    <field name="SpouseFamilyTitle"      type="hltext" indexed="false" stored="true" multiValued="true" />
-    <field name="PersonBirthDateStored"  type="hltext" indexed="false" stored="true" />
+    <field name="PersonMarriedName" type="surname"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonGivennameFacet" type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonSurnameFacet"   type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonCountryFacet"   type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonStateFacet"     type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonCenturyFacet"   type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="PersonDecadeFacet"    type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="ParentFamilyTitle"    type="hltext" indexed="false" stored="true" multiValued="true" />
+    <field name="SpouseFamilyTitle"    type="hltext" indexed="false" stored="true" multiValued="true" />
+    <field name="PersonBirthDateStored" type="hltext" indexed="false" stored="true" />
     <field name="PersonChrDateStored"  type="hltext" indexed="false" stored="true" multiValued="true" />
     <field name="PersonDeathDateStored"  type="hltext" indexed="false" stored="true" />
     <field name="PersonBurialDateStored"  type="hltext" indexed="false" stored="true" multiValued="true" />

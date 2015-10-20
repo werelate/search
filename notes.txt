@@ -1,0 +1,4 @@
+awk -F "," '{print $1}' givenname_similar_names.csv > conf/givennames70k.txt
+awk -F "," '{print $1}' surname_similar_names.csv > conf/surnames200k.txt
+# remove first two lines of each file
+
