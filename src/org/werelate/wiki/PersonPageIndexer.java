@@ -246,10 +246,16 @@ public class PersonPageIndexer extends BasePageIndexer
                if (place.length() > 0) {
                   String[] levels = place.split("\\s*,\\s*");
                   if (levels.length > 0) {
-                     countries.add(levels[levels.length-1]);
-                  }
-                  if (levels.length > 1) {
-                     states.add(levels[levels.length-1]+", "+levels[levels.length-2]);
+                     String country = levels[levels.length-1];
+                     if (Utils.COUNTRIES.contains(country)) {
+                        countries.add(country);
+                        if (levels.length > 1) {
+                           states.add(country+", "+levels[levels.length-2]);
+                        }
+                        else {
+                           states.add(country+", "+"Unknown");
+                        }
+                     }
                   }
                }
             }
@@ -264,6 +270,9 @@ public class PersonPageIndexer extends BasePageIndexer
             }
             doc.addField(Utils.FLD_PERSON_COUNTRY_FACET, buf.toString());
          }
+         else {
+            doc.addField(Utils.FLD_PERSON_COUNTRY_FACET, "Unknown");
+         }
          if (states.size() > 0) {
             buf.setLength(0);
             for (String p : states) {
@@ -277,6 +286,8 @@ public class PersonPageIndexer extends BasePageIndexer
 
          // get date facets
          nodes = xml.query("person/event_fact[@type='Birth']/@date");
+         Set<String> centuries = new HashSet<String>();
+         Set<String> decades = new HashSet<String>();
          for (int i = 0; i < nodes.size(); i++) {
             String date = nodes.get(i).getValue();
             if (date != null && date.length() > 0) {
@@ -294,12 +305,35 @@ public class PersonPageIndexer extends BasePageIndexer
                      century += "00";
                      decade += "0";
                   }
-                  doc.addField(Utils.FLD_PERSON_CENTURY_FACET, century);
+                  centuries.add(century);
                   if (decade.length() > 0) {
-                     doc.addField(Utils.FLD_PERSON_DECADE_FACET, decade);
+                     decades.add(decade);
                   }
                }
             }
+         }
+         if (centuries.size() > 0) {
+            buf.setLength(0);
+            for (String c : centuries) {
+               if (buf.length() > 0) {
+                  buf.append("|");
+               }
+               buf.append(c);
+            }
+            doc.addField(Utils.FLD_PERSON_CENTURY_FACET, buf.toString());
+         }
+         else {
+            doc.addField(Utils.FLD_PERSON_CENTURY_FACET, "Unknown");
+         }
+         if (decades.size() > 0) {
+            buf.setLength(0);
+            for (String d : decades) {
+               if (buf.length() > 0) {
+                  buf.append("|");
+               }
+               buf.append(d);
+            }
+            doc.addField(Utils.FLD_PERSON_DECADE_FACET, buf.toString());
          }
       }
    }

@@ -31,6 +31,7 @@ public class BoostRewriteComponent extends BaseRewriteComponent implements Named
    public static final float BOOST_NAME_RELATED = 0.6f;
    public static final float BOOST_NAME_DMP = 0.5f;
    public static final float BOOST_NAME_INITIAL = 0.2f;
+   public static final float BOOST_NAME_MARR = 0.2f;
 
    public static final float BOOST_TITLE_WORD = 0.1f;
 
@@ -243,6 +244,11 @@ public class BoostRewriteComponent extends BaseRewriteComponent implements Named
             temp.setBoost(origBoost * BOOST_NAME_RELATED);
             dq.add(temp);
          }
+      }
+      if ("PersonSurname".equals(fieldName)) {
+         TermQuery temp = new TermQuery(new Term("PersonMarriedName", text));
+         temp.setBoost(origBoost * BOOST_NAME_MARR);
+         dq.add(temp);
       }
    }
 
