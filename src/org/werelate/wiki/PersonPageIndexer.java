@@ -26,7 +26,7 @@ public class PersonPageIndexer extends BasePageIndexer
 {
    private static final String XPATH_PERSON_SURNAME = "person/name/@surname | person/alt_name/@surname | person/name/@title_suffix | person/alt_name/@title_suffix";
    private static final String XPATH_PERSON_GIVENNAME = "person/name/@given | person/alt_name/@given | person/name/@title_prefix | person/alt_name/@title_prefix";
-   private static final Pattern YEAR_PATTERN = Pattern.compile("\\b([12]*\\d{3})\\b");  // changed to include 3-digit years and 2xxx (Dec 2020 by Janet Bjorndahl)
+   private static final Pattern YEAR_PATTERN = Pattern.compile("\\b([012]?\\d{3})\\b");  // changed to include 3-digit years and 2xxx (Dec 2020 by Janet Bjorndahl)
 
    private static final IndexInstruction[] INSTRUCTIONS = {
       new IndexInstruction(Utils.FLD_PERSON_SURNAME, XPATH_PERSON_SURNAME),
