@@ -26,7 +26,7 @@ public class PersonPageIndexer extends BasePageIndexer
 {
    private static final String XPATH_PERSON_SURNAME = "person/name/@surname | person/alt_name/@surname | person/name/@title_suffix | person/alt_name/@title_suffix";
    private static final String XPATH_PERSON_GIVENNAME = "person/name/@given | person/alt_name/@given | person/name/@title_prefix | person/alt_name/@title_prefix";
-   private static final Pattern YEAR_PATTERN = Pattern.compile("\\b(1\\d{3})\\b");
+   private static final Pattern YEAR_PATTERN = Pattern.compile("\\b([012]?\\d{3})\\b");  // changed to include 3-digit years and 2xxx (Dec 2020 by Janet Bjorndahl)
 
    private static final IndexInstruction[] INSTRUCTIONS = {
       new IndexInstruction(Utils.FLD_PERSON_SURNAME, XPATH_PERSON_SURNAME),
@@ -286,18 +286,21 @@ public class PersonPageIndexer extends BasePageIndexer
 
          // get date facets
          nodes = xml.query("person/event_fact[@type='Birth']/@date");
+         if (nodes.size() == 0) {
+           nodes = xml.query("person/event_fact[@type='Christening']/@date");   // use Christening date if no Birth date (added Dec 2020 by Janet Bjorndahl)
+         }  
          Set<String> centuries = new HashSet<String>();
          Set<String> decades = new HashSet<String>();
          for (int i = 0; i < nodes.size(); i++) {
             String date = nodes.get(i).getValue();
             if (date != null && date.length() > 0) {
-               // find a 4-digit year and turn it into a century (pre1600,...,1900) and a decade (1600..1990)
+               // find a 3- or 4-digit year and turn it into a century (pre1600,...,1900,2000) and a decade (1600..2020)
                Matcher m = YEAR_PATTERN.matcher(date);
                if (m.find()) {
                   String year = m.group(1);
-                  String century = year.substring(0,2);
-                  String decade = year.substring(0,3);
-                  if (century.compareTo("16") < 0) {
+                  String century = year.substring(0,year.length()-2);         // updated to handle 3-digit years (Dec 2020 by Janet Bjorndahl)
+                  String decade = year.substring(0,year.length()-1);          // updated to handle 3-digit years (Dec 2020 by Janet Bjorndahl)
+                  if (century.compareTo("16") < 0 || century.length()==1) {   // updated to handle 3-digit years (Dec 2020 by Janet Bjorndahl)
                      century = "pre1600";
                      decade = "";
                   }
