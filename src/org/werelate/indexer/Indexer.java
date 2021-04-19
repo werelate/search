@@ -3,6 +3,12 @@ package org.werelate.indexer;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -377,7 +383,7 @@ public class Indexer
    public void commit() throws IOException, SQLException, SolrServerException
    {
       logger.info("Committing index");
-      solr.commit();
+      commitWithTimeout();
 
       logger.info("Saving checkpoints");
       irCm.saveCheckpoint();
@@ -385,6 +391,39 @@ public class Indexer
       mlCm.saveCheckpoint();
       dlCm.saveCheckpoint();
       apCm.saveCheckpoint();
+   }
+
+   public void commitWithTimeout() throws SolrServerException
+   {
+      ExecutorService executor = Executors.newCachedThreadPool();
+      Callable<Object> task = new Callable<Object>() {
+         public Object call() throws ExecutionException {
+            try {
+               return solr.commit();
+            } catch (IOException e) {
+               logger.info("ERROR IOException: " + e);
+               throw new ExecutionException(e);
+            } catch (SolrServerException e) {
+               logger.info("ERROR SolrServerException: " + e);
+               throw new ExecutionException(e);
+            }
+         }
+      };
+      Future<Object> future = executor.submit(task);
+      try {
+         Object result = future.get(30, TimeUnit.SECONDS);
+      } catch (TimeoutException e) {
+         logger.info("ERROR Commit timeout exception: " + e);
+         throw new SolrServerException("Commit timeout");
+      } catch (InterruptedException e) {
+         logger.info("ERROR Commit interrupted exception: " + e);
+         throw new SolrServerException("Commit interrupted");
+      } catch (ExecutionException e) {
+         logger.info("ERROR Commit execution error: " + e);
+         throw new SolrServerException("Commit execution exception");
+      } finally {
+         future.cancel(true); // may or may not desire this
+      }
    }
 
    public void indexChanges() throws IOException, SQLException, IllegalAccessException, InstantiationException, ClassNotFoundException, ParsingException, SolrServerException {
@@ -436,7 +475,7 @@ public class Indexer
       AllPagesTaskGenerator aptg = new AllPagesTaskGenerator(wikiClient, wikiHostname, false, namespaces);
       do {
          index(aptg, apCm, backgroundDelayMillis, maxBackgroundPages);
-         solr.commit();
+         commitWithTimeout();
          logger.info("committed index page_id="+apCm.getCheckpoint());
       } while (!aptg.isAtEnd());
    }
@@ -463,7 +502,7 @@ public class Indexer
       finally {
          if (commitNeeded) {
             logger.info("Committing index");
-            solr.commit();
+            commitWithTimeout();
          }
          cleanup();
       }
