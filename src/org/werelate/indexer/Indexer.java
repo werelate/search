@@ -393,7 +393,7 @@ public class Indexer
       apCm.saveCheckpoint();
    }
 
-   public void commitWithTimeout() throws SolrServerException
+   public void commitWithTimeout()
    {
       ExecutorService executor = Executors.newCachedThreadPool();
       Callable<Object> task = new Callable<Object>() {
@@ -414,13 +414,13 @@ public class Indexer
          Object result = future.get(30, TimeUnit.SECONDS);
       } catch (TimeoutException e) {
          logger.info("ERROR Commit timeout exception: " + e);
-         throw new SolrServerException("Commit timeout");
+         System.exit(1);
       } catch (InterruptedException e) {
          logger.info("ERROR Commit interrupted exception: " + e);
-         throw new SolrServerException("Commit interrupted");
+         System.exit(1);
       } catch (ExecutionException e) {
          logger.info("ERROR Commit execution error: " + e);
-         throw new SolrServerException("Commit execution exception");
+         System.exit(1);
       } finally {
          future.cancel(true); // may or may not desire this
       }
