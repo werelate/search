@@ -534,6 +534,12 @@
         <str name="wt">php</str>
       </lst>
    </requestHandler>
+  
+   <requestHandler name="/dqfind" class="org.werelate.search.DataQualityRequestHandler" >
+      <lst name="defaults">
+        <str name="wt">php</str>
+      </lst>
+   </requestHandler>
 
   <!-- Update request handler.
   
@@ -550,6 +556,7 @@
     <!--
     <str name="update.processor.class">org.apache.solr.handler.UpdateRequestProcessor</str>
     -->
+      
   </requestHandler>
 
   <!--
