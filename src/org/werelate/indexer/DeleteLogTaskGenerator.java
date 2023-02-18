@@ -46,12 +46,13 @@ public class DeleteLogTaskGenerator extends BaseTaskGenerator
          for (int i=0; i < rows.size(); i++)
          {
             Element row = rows.get(i);
-            // don't add the page id that we saw last time
-            if (fields.length < 2 || !row.getAttributeValue("page_id").equals(fields[1])) {
-               tasks.add(new IndexTask(row.getAttributeValue("timestamp"),
-                    row.getAttributeValue("page_id"), row.getAttributeValue("action").equalsIgnoreCase("delete") ? IndexTask.ACTION_DELETE : IndexTask.ACTION_UPDATE,
-                                       0, null));
-            }
+            // ignore this check - the page may have been undeleted
+//            // don't add the page id that we saw last time
+//            if (fields.length < 2 || !row.getAttributeValue("page_id").equals(fields[1])) {
+            tasks.add(new IndexTask(row.getAttributeValue("timestamp"),
+                 row.getAttributeValue("page_id"), row.getAttributeValue("action").equalsIgnoreCase("delete") ? IndexTask.ACTION_DELETE : IndexTask.ACTION_UPDATE,
+                                    0, null));
+//            }
          }
       }
       finally
