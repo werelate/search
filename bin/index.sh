@@ -10,10 +10,11 @@ java -Xmx256m -Dfile.encoding=UTF-8 -Dnet.spy.log.LoggerImpl=net.spy.memcached.c
 ../lib/lucene-core-3.1-SNAPSHOT.jar:\
 ../lib/lucene-highlighter-3.1-SNAPSHOT.jar:\
 ../lib/mysql-connector-java-5.0.4-bin.jar:\
-../lib/names-score-1.1-jar-with-dependencies.jar:\
+../lib/names-score-1.1.1-jar-with-dependencies.jar:\
 ../lib/commons-codec-1.4.jar:\
 ../lib/commons-logging.jar:\
 ../lib/commons-httpclient-3.1.jar:\
+../lib/shared.jar:\
 ../lib/slf4j-api-1.5.5.jar:\
 ../lib/slf4j-jcl-1.5.5.jar:\
 ../lib/spymemcached-2.7.3.jar:\
