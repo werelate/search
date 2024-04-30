@@ -540,6 +540,12 @@
         <str name="wt">php</str>
       </lst>
    </requestHandler>
+  
+   <requestHandler name="/eventdate" class="org.werelate.search.EventDateRequestHandler" >
+      <lst name="defaults">
+        <str name="wt">php</str>
+      </lst>
+   </requestHandler>
 
   <!-- Update request handler.
   
