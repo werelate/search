@@ -61,7 +61,7 @@ public class DataQualityRequestHandler extends RequestHandlerBase {
       }
 
       // Get issues for a family page or for a child in relation to the parents' family page
-      // Also get earliest and latest birth years needed to determine if the husband, wife, or child might be living.
+      // Also get latest birth years needed to determine if the husband, wife, or child might be living.
       if (namespace.equals("Family")) {
          String familyTitle = params.get("ftitle");
          String childTitle = params.get("ctitle");
@@ -73,11 +73,8 @@ public class DataQualityRequestHandler extends RequestHandlerBase {
             familyDQAnalysis.refineHusbandBirthYear();
             familyDQAnalysis.refineWifeBirthYear();
          }
-         rsp.add("hEarliestBirth", familyDQAnalysis.getHEarliestBirth());
          rsp.add("hLatestBirth", familyDQAnalysis.getHLatestBirth());
-         rsp.add("wEarliestBirth", familyDQAnalysis.getWEarliestBirth());
          rsp.add("wLatestBirth", familyDQAnalysis.getWLatestBirth());
-         rsp.add("cEarliestBirth", familyDQAnalysis.getCEarliestBirth());
          rsp.add("cLatestBirth", familyDQAnalysis.getCLatestBirth());
          issues = familyDQAnalysis.getIssues();
          addIssuesToResponse(issues, rsp);
