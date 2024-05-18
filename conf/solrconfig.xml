@@ -541,12 +541,6 @@
       </lst>
    </requestHandler>
   
-   <requestHandler name="/eventdate" class="org.werelate.search.EventDateRequestHandler" >
-      <lst name="defaults">
-        <str name="wt">php</str>
-      </lst>
-   </requestHandler>
-
   <!-- Update request handler.
   
        Note: Since solr1.1 requestHandlers requires a valid content type header if posted in 
