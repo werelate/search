@@ -49,19 +49,33 @@ public class DataQualityRequestHandler extends RequestHandlerBase {
       Element root = Utils.parseText(new Builder(), data, true).getRootElement();
       String[][] issues = new String[1000][4];
 
-      // Get issues for a person page
+      // Get issues for a person page, and variables needed to determine whether the person might be living.
       if (namespace.equals("Person")) {
          String personTitle = params.get("pTitle");
          PersonDQAnalysis personDQAnalysis = new PersonDQAnalysis(root, personTitle);
+         rsp.add("earliestBirth", personDQAnalysis.getEarliestBirth());
+         rsp.add("latestBirth", personDQAnalysis.getLatestBirth());
+         rsp.add("isDeadOrExempt", personDQAnalysis.isDeadOrExempt());
          issues = personDQAnalysis.getIssues();
          addIssuesToResponse(issues, rsp);
       }
 
       // Get issues for a family page or for a child in relation to the parents' family page
+      // Also get latest birth years needed to determine if the husband, wife, or child might be living.
       if (namespace.equals("Family")) {
          String familyTitle = params.get("ftitle");
          String childTitle = params.get("ctitle");
          FamilyDQAnalysis familyDQAnalysis = new FamilyDQAnalysis(root, familyTitle, childTitle);
+         if (!childTitle.equals("none")) {
+            familyDQAnalysis.refineChildBirthYear();
+         }
+         else {
+            familyDQAnalysis.refineHusbandBirthYear();
+            familyDQAnalysis.refineWifeBirthYear();
+         }
+         rsp.add("hLatestBirth", familyDQAnalysis.getHLatestBirth());
+         rsp.add("wLatestBirth", familyDQAnalysis.getWLatestBirth());
+         rsp.add("cLatestBirth", familyDQAnalysis.getCLatestBirth());
          issues = familyDQAnalysis.getIssues();
          addIssuesToResponse(issues, rsp);
       }
