@@ -9,8 +9,8 @@ java -Xmx256m -Dfile.encoding=UTF-8 -Dnet.spy.log.LoggerImpl=net.spy.memcached.c
 ../lib/apache-solr-core-3.1.0.jar:\
 ../lib/lucene-core-3.1-SNAPSHOT.jar:\
 ../lib/lucene-highlighter-3.1-SNAPSHOT.jar:\
-../lib/mysql-connector-java-5.0.4-bin.jar:\
-../lib/names-score-1.1.1-jar-with-dependencies.jar:\
+../lib/mysql-connector-j-8.0.33.jar:\
+../lib/names-score-1.1.2-jar-with-dependencies.jar:\
 ../lib/commons-codec-1.4.jar:\
 ../lib/commons-logging.jar:\
 ../lib/commons-httpclient-3.1.jar:\

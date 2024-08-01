@@ -72,7 +72,7 @@
            <exclude name="commons-codec-1.4.jar"/>
            <!-- <exclude name="concurrent.jar"/> -->
            <!-- <exclude name="jcs-1.3.jar"/> -->
-           <exclude name="mysql-connector-java-5.0.4-bin.jar"/>
+           <exclude name="mysql-connector-j-8.0.33.jar"/>
            <!-- exclude name="xom-1.1b5.jar"/ -->
            <exclude name="apache-solr-core-3.1.0.jar"/>
            <exclude name="apache-solr-solrj-3.1.0.jar"/>
