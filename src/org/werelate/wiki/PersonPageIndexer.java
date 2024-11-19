@@ -31,6 +31,7 @@ public class PersonPageIndexer extends BasePageIndexer
    private static final IndexInstruction[] INSTRUCTIONS = {
       new IndexInstruction(Utils.FLD_PERSON_SURNAME, XPATH_PERSON_SURNAME),
       new IndexInstruction(Utils.FLD_PERSON_GIVENNAME, XPATH_PERSON_GIVENNAME),
+      new IndexInstruction(Utils.FLD_PERSON_GENDER, "person/gender"),
       new IndexInstruction(Utils.FLD_PERSON_BIRTH_DATE, "person/event_fact[@type='Birth' or @type='Baptism' or @type='Christening' or @type='Alt Birth' or @type='Alt Christening']/@date", Utils.UNKNOWN_DATE),
       new IndexInstruction(Utils.FLD_PERSON_BIRTH_DATE_STORED, "person/event_fact[@type='Birth']/@date"),
       new IndexInstruction(Utils.FLD_PERSON_CHR_DATE_STORED, "person/event_fact[@type='Christening'or @type='Baptism' ]/@date"),
@@ -52,6 +53,7 @@ public class PersonPageIndexer extends BasePageIndexer
    private Normalizer normalizer;
    private Set<String> allSurnames = new HashSet<String>();
    private Set<String> allGivennames = new HashSet<String>();
+   private String pageSortName = null;
 
    public PersonPageIndexer(DatabaseConnectionHelper conn) throws SQLException, IOException {
       super(conn);
@@ -86,18 +88,146 @@ public class PersonPageIndexer extends BasePageIndexer
       {Utils.FLD_MOTHER_GIVENNAME, Utils.FLD_MOTHER_SURNAME},
    };
 
-   protected String getTitleSort(String title, Document xml) {
+   /* Override base method. Note that this also stores the sort name for use in creating the surname index facet. */
+   protected String getTitleSort(String fullTitle, Document xml) {
       if (xml != null) {
          Nodes nodes  = xml.query("person/name");
          if (nodes.size() > 0) {
-            String name = getFullname((Element)nodes.get(0));
-            if (name.indexOf(' ') > 0) {
-               // TODO remove
-               return "Person:"+name;
+            Element name = (Element)nodes.get(0);
+            if (!Utils.isEmpty(getNameAttr(name, "surname")) || !Utils.isEmpty(getNameAttr(name, "given"))) {
+               pageSortName = getReversedSortName(name);
+               return "Person:" + pageSortName;
             }
          }
       }
-      return removeIndexNumber(title);
+      pageSortName = getReversedTitle(fullTitle.substring(7));
+      return "Person:" + pageSortName;
+   }
+
+   /* Name for sorting, starting with surname. Excludes prefix and suffix.
+      If both given and surname are unknown, return just "Unknown". */
+   protected static String getReversedSortName(Element name) {
+      StringBuilder buf = new StringBuilder();
+
+      String surname = getNameAttr(name, "surname");
+      String given = getNameAttr(name, "given");
+      if (!Utils.isEmpty(surname) && !surname.toLowerCase().equals("unknown")) {
+         appendAttr(surname, buf);
+      }
+      else {
+         appendAttr("Unknown", buf);
+         if (Utils.isEmpty(given) || given.toLowerCase().equals("unknown")) {
+            return buf.toString();
+         }
+      }
+      appendAttr(",", buf);
+      if (!Utils.isEmpty(given)) {
+         appendAttr(given, buf);
+      }
+      else {
+         appendAttr("Unknown", buf);
+      }
+      return buf.toString();
+   }
+
+   /* Name for sorting or display, starting with surname - from the page title for when there are no name fields.
+      If both given and surname are unknown, return just "Unknown". */
+   protected static String getReversedTitle(String titleName) {
+      StringBuilder buf = new StringBuilder();
+      String[] namePieces = removeIndexNumber(titleName).split(" ", 2);
+      if (namePieces.length>1 && !namePieces[1].toLowerCase().equals("unknown")) {
+         appendAttr(namePieces[1], buf);
+      }
+      else {
+         appendAttr("Unknown", buf);
+         if (namePieces[0].toLowerCase().equals("unknown")) {
+            return buf.toString();
+         }
+      }
+      appendAttr(",", buf);
+      appendAttr(namePieces[0], buf);
+      return buf.toString(); 
+   }
+
+   /* Name for display, starting with surname. Includes prefix and suffix.
+      If both given and surname are unknown, return just "Unknown". */
+   protected static String getReversedFullname(Element name) {
+      StringBuilder buf = new StringBuilder();
+      if (!Utils.isEmpty(getNameAttr(name, "surname"))) {
+         appendAttr(getNameAttr(name, "surname"), buf);
+      }
+      else {
+         appendAttr("Unknown", buf);
+      }
+      appendAttr(",", buf);
+      appendAttr(getNameAttr(name, "title_prefix"), buf);
+      if (!Utils.isEmpty(getNameAttr(name, "given"))) {
+         appendAttr(getNameAttr(name, "given"), buf);
+      }
+      else {
+         appendAttr("Unknown", buf);
+      }
+      if (!Utils.isEmpty(getNameAttr(name, "title_suffix"))) {
+         appendAttr(",",buf);
+         appendAttr(getNameAttr(name, "title_suffix"), buf);
+      }
+      if (buf.toString().toLowerCase().equals("unknown, unknown")) {
+         return "Unknown";
+      }
+      return buf.toString();
+}
+
+   protected static String getFullname(Element name) {
+      StringBuilder buf = new StringBuilder();
+      appendAttr(getNameAttr(name, "title_prefix"), buf);
+      appendAttr(!Utils.isEmpty(getNameAttr(name, "given")) ? getNameAttr(name, "given") : "___", buf);
+      appendAttr(getNameAttr(name, "surname"), buf);
+      appendAttr(getNameAttr(name, "title_suffix"), buf);
+      return buf.toString();
+   }
+
+   /* First letter of surname for the surname index.
+      This uses the saved page sort name, which begins with the surname as found in the XML or the page title.
+      If no letters in surname, return "U" for Unknown. If surname cannot be romanized, return "other". */
+   protected static String getSurnameIndex(String pageSortName) {
+      String index = null;
+      String[] split = pageSortName.split(",",2);
+      String name = Utils.romanize(split[0]);
+      if (name != null && name.length() > 0) {
+         for (int i=0; name.length()>i; i++) {
+            char c = Character.toUpperCase(name.charAt(i));
+            if (c >= 'A' && c <= 'Z') {
+               index = String.valueOf(c);
+               break;
+            }
+            else if ((int)c > 127) {  // a character that could not be romanized
+               index = "other";
+               break;
+            }
+         }
+      }
+      if (index == null) { // no alphabetic characters
+         index = "U";
+      }
+      return index;
+   }
+         
+   /* Get the trimmed value of a part of the name. */
+   protected static String getNameAttr(Element name, String attr) {
+      String nameAttr = name.getAttributeValue(attr);
+      if (nameAttr!=null) {
+         nameAttr = nameAttr.trim();
+      }
+      return nameAttr;
+   }
+
+   protected static void appendAttr(String attr, StringBuilder buf) {
+      if (!Utils.isEmpty(attr)) {
+         if (buf.length() > 0 && !attr.equals(",")) {
+            buf.append(" ");
+         }
+         buf.append(attr);
+      }
    }
 
    // add parents' names, spouse name, default person name, store fullname
@@ -165,11 +295,51 @@ public class PersonPageIndexer extends BasePageIndexer
             doc.addField(Utils.FLD_PERSON_GIVENNAME, names.length >= 1 ? names[0] : Utils.UNKNOWN_NAME);
          }
 
-         // store fullname
+         // add initials of given names (not prefixes, as there is no value in searching on initials of a prefix)
+         else {
+            for (int i=0; i < nodes.size(); i++) {
+               if (nodes.get(i).toString().contains("given=")) {
+                  String allGiven = nodes.get(i).getValue();
+                  String initials = "";
+                  for (String s : allGiven.split(" ")) {
+                     if (s.length() > 0) {
+                        initials += initials.length()>0 ? " " + s.charAt(0) : s.charAt(0);
+                     }
+                  }
+                  if (initials.length() > 0) {
+                     doc.addField(Utils.FLD_PERSON_GIVENNAME, initials);
+                  }
+               }
+            }
+         }
+
+         // store fullname (surname first)
          nodes = xml.query("person/name");
          if (nodes.size() > 0) {
-            doc.addField(Utils.FLD_FULLNAME_STORED, getFullname((Element)nodes.get(0)));
+            doc.addField(Utils.FLD_FULLNAME_STORED, getReversedFullname((Element)nodes.get(0)));
          }
+         else {
+            doc.addField(Utils.FLD_FULLNAME_STORED, getReversedTitle(title));
+         }
+
+         // store fullname of alt names, except for married surnames already captured
+         nodes = xml.query("person/alt_name");
+         for (int i = 0, len = 0; i < nodes.size() && len < /* Utils.MAX_ALTNAME_LENGTH */ 100; i++) {
+            Element name = (Element)nodes.get(i);
+            if (name.getAttributeValue("surname") == null || name.getAttributeValue("type") == null || 
+                  !(name.getAttributeValue("type").equals("Married Name") && marriedNames.contains(name.getAttributeValue("surname")))) {
+               String nameType = null;
+               nameType = name.getAttributeValue("type");
+               if (nameType == null) {
+                  nameType = "U";
+               }
+               else {
+                  nameType = nameType.substring(0,1);
+               }
+               doc.addField(Utils.FLD_ALTNAME_STORED, getFullname(name));
+               len += getFullname(name).length();
+            }
+         }      
 
          // store unsourced
          if (isUnsourced(xml, wikiContents)) {
@@ -231,6 +401,10 @@ public class PersonPageIndexer extends BasePageIndexer
             buf.append("Unknown");
          }
          doc.addField(Utils.FLD_PERSON_GIVENNAME_FACET, buf.toString());
+
+         /* get surname index facet (first alphabetic letter of the page sort name) 
+            Note: This relies on getTitleSort being run first. */
+         doc.addField(Utils.FLD_SURNAME_INDEX_FACET, getSurnameIndex(pageSortName));
 
          // get place facets
          nodes = xml.query("person/event_fact/@place");

@@ -54,7 +54,7 @@ public class ImagePageIndexer extends BasePageIndexer
          // store fullname(s)
          nodes = xml.query("image_data/person");
          if (nodes.size() > 0) {
-            doc.addField(Utils.FLD_FULLNAME_STORED, getFullname((Element)nodes.get(0)));
+            doc.addField(Utils.FLD_FULLNAME_STORED, PersonPageIndexer.getFullname((Element)nodes.get(0)));
          }
       }
    }

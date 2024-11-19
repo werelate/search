@@ -37,7 +37,7 @@
    <!-- Values here affect all index writers and act as a default unless overridden. -->
     <useCompoundFile>false</useCompoundFile>
 
-    <mergeFactor>2</mergeFactor>
+    <mergeFactor>20</mergeFactor>
     <!--
      If both ramBufferSizeMB and maxBufferedDocs is set, then Lucene will flush based on whichever limit is hit first.
 
@@ -384,18 +384,18 @@
       <str name="hl.fl">TitleStored,
          PersonBirthDateStored,PersonBirthPlaceStored,PersonDeathDateStored,PersonDeathPlaceStored,
          PersonChrDateStored,PersonChrPlaceStored,PersonBurialDateStored,PersonBurialPlaceStored,
-         ParentFamilyTitle,SpouseFamilyTitle,ChildTitle,
+         PersonGender,ParentFamilyTitle,SpouseFamilyTitle,ChildTitle,
          MarriageDateStored,MarriagePlaceStored,BannsDateStored,BannsPlaceStored,
-         UserStored,SurnameStored,FullnameStored,PlaceStored,
+         UserStored,SurnameStored,FullnameStored,AltnameStored,PlaceStored,
          PlaceType,SourceSubjectStored,SourceAvailabilityStored,AuthorStored,SourceTitleStored,
          TextStored
       </str>
       <str name="fl">TitleStored,
          PersonBirthDateStored,PersonBirthPlaceStored,PersonDeathDateStored,PersonDeathPlaceStored,
          PersonChrDateStored,PersonChrPlaceStored,PersonBurialDateStored,PersonBurialPlaceStored,
-         ParentFamilyTitle,SpouseFamilyTitle,ChildTitle,
+         PersonGender, ParentFamilyTitle,SpouseFamilyTitle,ChildTitle,
          MarriageDateStored,MarriagePlaceStored,BannsDateStored,BannsPlaceStored,
-         UserStored,SurnameStored,FullnameStored,PlaceStored,
+         UserStored,SurnameStored,FullnameStored,AltnameStored,PlaceStored,
          PlaceType,SourceSubjectStored,SourceAvailabilityStored,AuthorStored,SourceTitleStored,
          PageId,NamespaceStored,LastModDate,PrimaryImage,FromYear,ToYear,SourceSubSubject,
          HusbandBirthDateStored,HusbandChrDateStored,HusbandDeathDateStored,HusbandBurialDateStored,
@@ -417,6 +417,7 @@
       <str name="f.PersonBurialDateStored.hl.alternateField">PersonBurialDateStored</str>
       <str name="f.PersonDeathPlaceStored.hl.alternateField">PersonDeathPlaceStored</str>
       <str name="f.PersonBurialPlaceStored.hl.alternateField">PersonBurialPlaceStored</str>
+      <str name="f.PersonGender.hl.alternateField">PersonGender</str>
       <str name="f.ParentFamilyTitle.hl.alternateField">ParentFamilyTitle</str>
       <str name="f.SpouseFamilyTitle.hl.alternateField">SpouseFamilyTitle</str>
       <str name="f.MarriageDateStored.hl.alternateField">MarriageDateStored</str>
@@ -436,6 +437,7 @@
 -->
       <str name="f.SurnameStored.hl.alternateField">SurnameStored</str>
       <str name="f.FullnameStored.hl.alternateField">FullnameStored</str>
+      <str name="f.AltnameStored.hl.alternateField">AltnameStored</str>
       <str name="f.PlaceStored.hl.alternateField">PlaceStored</str>
       <str name="f.PlaceType.hl.alternateField">PlaceType</str>
       <str name="f.SourceSubjectStored.hl.alternateField">SourceSubjectStored</str>

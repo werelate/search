@@ -57,6 +57,7 @@ public class Utils
 
    public static final String FLD_PERSON_SURNAME = "PersonSurname";
    public static final String FLD_PERSON_GIVENNAME = "PersonGivenname";
+   public static final String FLD_PERSON_GENDER = "PersonGender";
    public static final String FLD_PERSON_BIRTH_DATE = "PersonBirthDate";
    public static final String FLD_PERSON_DEATH_DATE = "PersonDeathDate";
    public static final String FLD_PERSON_BIRTH_YEAR = "PersonBirthYear";
@@ -86,6 +87,8 @@ public class Utils
    public static final String FLD_PERSON_CHR_PLACE_STORED = "PersonChrPlaceStored";
    public static final String FLD_PERSON_DEATH_PLACE_STORED = "PersonDeathPlaceStored";
    public static final String FLD_PERSON_BURIAL_PLACE_STORED = "PersonBurialPlaceStored";
+
+   public static final String FLD_SURNAME_INDEX_FACET = "SurnameIndexFacet";
 
    public static final String FLD_HUSBAND_SURNAME = "HusbandSurname";
    public static final String FLD_HUSBAND_GIVENNAME = "HusbandGivenname";
@@ -135,6 +138,7 @@ public class Utils
    public static final String FLD_OTHER_PLACE = "OtherPlace";
    public static final String FLD_SURNAME_STORED = "SurnameStored";
    public static final String FLD_FULLNAME_STORED = "FullnameStored";   // fullname/familyTitle in images; fullname on Person page
+   public static final String FLD_ALTNAME_STORED = "AltnameStored";
    public static final String FLD_PLACE_STORED = "PlaceStored";
    public static final String FLD_PRIMARY_IMAGE = "PrimaryImage";
    public static final String FLD_FROM_YEAR = "FromYear";
@@ -170,8 +174,9 @@ public class Utils
       HIGHLIGHT_FIELDS.put(FLD_TITLE, new String[]{FLD_TITLE_STORED});
       HIGHLIGHT_FIELDS.put(FLD_USER, new String[]{FLD_USER_STORED});
       HIGHLIGHT_FIELDS.put(FLD_KEYWORDS, new String[]{FLD_TEXT_STORED,FLD_TITLE_STORED});
-      HIGHLIGHT_FIELDS.put(FLD_PERSON_SURNAME, new String[]{FLD_FULLNAME_STORED,FLD_TITLE_STORED});
-      HIGHLIGHT_FIELDS.put(FLD_PERSON_GIVENNAME, new String[]{FLD_FULLNAME_STORED,FLD_TITLE_STORED});
+      HIGHLIGHT_FIELDS.put(FLD_PERSON_SURNAME, new String[]{FLD_FULLNAME_STORED,FLD_TITLE_STORED,FLD_ALTNAME_STORED});
+      HIGHLIGHT_FIELDS.put(FLD_PERSON_GIVENNAME, new String[]{FLD_FULLNAME_STORED,FLD_TITLE_STORED,FLD_ALTNAME_STORED});
+      HIGHLIGHT_FIELDS.put(FLD_PERSON_GENDER, new String[]{FLD_PERSON_GENDER});
       HIGHLIGHT_FIELDS.put(FLD_PERSON_BIRTH_DATE, new String[]{FLD_PERSON_BIRTH_DATE_STORED, FLD_PERSON_CHR_DATE_STORED});
       HIGHLIGHT_FIELDS.put(FLD_PERSON_BIRTH_YEAR, new String[]{FLD_PERSON_BIRTH_DATE_STORED, FLD_PERSON_CHR_DATE_STORED});
       HIGHLIGHT_FIELDS.put(FLD_PERSON_BIRTH_PLACE, new String[]{FLD_PERSON_BIRTH_PLACE_STORED, FLD_PERSON_CHR_PLACE_STORED});
@@ -655,8 +660,6 @@ public class Utils
       }
       int outLen = 0;
       boolean match = false;
-      char[] srcChar = null;
-      char[] destChars = null;
 
       for (int i = 0; i < inLen; i++) {
          char c = in[i];

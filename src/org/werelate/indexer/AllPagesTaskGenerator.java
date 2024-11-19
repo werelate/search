@@ -56,20 +56,21 @@ public class AllPagesTaskGenerator extends BaseTaskGenerator
          }
          Elements rows = root.getChildElements("row");
 
-         // are we at the end? if rolling over,, don't bother indexing these because they will have just been indexed; instead, start over
+         // index rows (even if this is the last group of records and we can assume they were recently indexed, because the indexing
+         // code may have changed)
+         for (int i=0; i < rows.size(); i++)
+         {
+            Element row = rows.get(i);
+            tasks.add(new IndexTask(row.getAttributeValue("page_id"), row.getAttributeValue("page_id"), IndexTask.ACTION_UPDATE, 0, null));
+         }
+
+         // are we at the end? if rolling over, start over
          if (rows.size() < max && !rollOver) {
             atEnd = true;
          }
          if (rows.size() < max && rollOver) {
             logger.warning("Resetting all-pages checkpoint to 0");
             cm.updateCheckpoint("0");
-         }
-         else {
-            for (int i=0; i < rows.size(); i++)
-            {
-               Element row = rows.get(i);
-               tasks.add(new IndexTask(row.getAttributeValue("page_id"), row.getAttributeValue("page_id"), IndexTask.ACTION_UPDATE, 0, null));
-            }
          }
 //         logger.info("allpages requested max="+max+" got="+rows.size());
       }
