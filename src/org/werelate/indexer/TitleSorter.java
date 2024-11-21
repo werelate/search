@@ -65,11 +65,9 @@ public class TitleSorter {
          value = (int)(((long)prevValue + (long)nextValue)/(long)2);
 
          // insert the new sort value for this title
-         if (value != prevValue) {
-            psInsert.setString(1, key);
-            psInsert.setInt(2, value);
-            psInsert.executeUpdate();
-         }
+         psInsert.setString(1, key);
+         psInsert.setInt(2, value);
+         psInsert.executeUpdate();
       }
 
       return value;
