@@ -470,39 +470,44 @@ public class Indexer
       }
    }
 
-   private void indexNamespaces(String[] namespaces, String startingPageId) throws IOException, SQLException, ParsingException, SolrServerException {
-      apCm.updateCheckpoint(startingPageId);
-      AllPagesTaskGenerator aptg = new AllPagesTaskGenerator(wikiClient, wikiHostname, false, namespaces);
-      do {
-         index(aptg, apCm, backgroundDelayMillis, maxBackgroundPages);
-         commitWithTimeout();
-         logger.info("committed index page_id="+apCm.getCheckpoint());
-      } while (!aptg.isAtEnd());
-   }
-
-   public void indexAll() throws IOException, SolrServerException, ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, ParsingException {
-      AllPagesTaskGenerator aptg;
+   public void indexAll(String startingPageId) throws IOException, SolrServerException, ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, ParsingException {
       boolean commitNeeded = false;
       try {
          startIndexing();
-
-         // index given names, surnames, and places first
-//         logger.info("Indexing givennames, surnames, places");
-//         String[] namespaces = {"100","102","106"};
-//         commitNeeded = true;
-//         indexNamespaces(namespaces, "0");
-//         commitNeeded = false;
-
          // index everything
-         logger.info("Indexing everything");
-         commitNeeded = true;
-         indexNamespaces(null, "0");
-         commitNeeded = false;
+         logger.info("Indexing all starting from " + startingPageId);
+         apCm.updateCheckpoint(startingPageId);
+         AllPagesTaskGenerator aptg = new AllPagesTaskGenerator(wikiClient, wikiHostname, false, null);
+         List<IndexTask> indexBatch = new ArrayList<IndexTask>();
+         do {
+            logger.info("  requesting "+ maxIndexTaskSize + " index tasks");
+            List<IndexTask> indexTasks = aptg.getTasks(apCm, maxIndexTaskSize);
+            logger.info("  got "+ indexTasks.size() + " index tasks starting with sequenceId="+(indexTasks.size() == 0 ? "" : indexTasks.get(0).getSequenceId()));
+            // index a batch at a time
+            for (IndexTask it : indexTasks) {
+               indexBatch.add(it);
+               aptg.updateCheckpoint(it, apCm);
+               if (indexBatch.size() >= indexBatchSize) {
+                  // index the pages
+                  commitNeeded = true;
+                  indexBatch(indexBatch);
+                  indexBatch.clear();
+               }
+            }
+            commitWithTimeout();
+            commitNeeded = false;
+            logger.info("committed index page_id="+apCm.getCheckpoint());
+         } while (!aptg.isAtEnd());
+         if (indexBatch.size() > 0) {
+            // index the pages
+            commitNeeded = true;
+            indexBatch(indexBatch);
+         }
       }
       finally {
          if (commitNeeded) {
-            logger.info("Committing index");
             commitWithTimeout();
+            logger.info("committed index page_id="+apCm.getCheckpoint());
          }
          cleanup();
       }
@@ -512,7 +517,7 @@ public class Indexer
    public static void main(String[] args) throws ParseException, IOException, IllegalAccessException, SQLException, ParsingException, ClassNotFoundException, InstantiationException, SolrServerException {
       Options opt = new Options();
       opt.addOption("p", true, "java .properties file");
-      opt.addOption("r", false, "if set, re-index everything; set mergeFactor in solrconfig.xml to a high number like 20 for this option");
+      opt.addOption("r", true, "reindex starting page Id; if set, re-index everything starting at starting page Id; set mergeFactor in solrconfig.xml to a high number like 20 for this option");
       opt.addOption("h", false, "Print out help information");
 
       BasicParser parser = new BasicParser();
@@ -528,7 +533,7 @@ public class Indexer
       properties.load(new FileInputStream(cl.getOptionValue("p")));
       Indexer indexer = new Indexer(properties);
       if (cl.hasOption("r")) {
-         indexer.indexAll();
+         indexer.indexAll(cl.getOptionValue("r"));
       }
       else {
          indexer.indexChanges();
