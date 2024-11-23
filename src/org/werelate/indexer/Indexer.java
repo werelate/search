@@ -70,7 +70,9 @@ public class Indexer
    private BasePageIndexer mysourcePageIndexer;
    private BasePageIndexer repositoryPageIndexer;
    private BasePageIndexer personPageIndexer;
+   private BasePageIndexer personTalkPageIndexer;
    private BasePageIndexer familyPageIndexer;
+   private BasePageIndexer familyTalkPageIndexer;
    private BasePageIndexer categoryPageIndexer;
    private BasePageIndexer defaultPageIndexer;
 
@@ -131,7 +133,9 @@ public class Indexer
       mysourcePageIndexer = new MySourcePageIndexer(conn);
       repositoryPageIndexer = new RepositoryPageIndexer(conn);
       personPageIndexer = new PersonPageIndexer(conn);
+      personTalkPageIndexer = new PersonTalkPageIndexer(conn);
       familyPageIndexer = new FamilyPageIndexer(conn);
+      familyTalkPageIndexer = new FamilyTalkPageIndexer(conn);
       categoryPageIndexer = new CategoryPageIndexer(conn);
       defaultPageIndexer = new DefaultPageIndexer(conn);
    }
@@ -190,8 +194,14 @@ public class Indexer
          case Utils.NS_PERSON:
             indexer = personPageIndexer;
             break;
+         case Utils.NS_PERSON + 1:
+            indexer = personTalkPageIndexer;
+            break;
          case Utils.NS_FAMILY:
             indexer = familyPageIndexer;
+            break;
+         case Utils.NS_FAMILY + 1:
+            indexer = familyTalkPageIndexer;
             break;
          case Utils.NS_CATEGORY:
             indexer = categoryPageIndexer;

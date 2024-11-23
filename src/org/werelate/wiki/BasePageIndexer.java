@@ -25,6 +25,7 @@ public abstract class BasePageIndexer
    private static final int MAX_INT_DIGITS = 10;
    private static final Pattern CATEGORY_PATTERN = Pattern.compile("\\[\\[[cC]ategory:([^\\|\\]]+).*?\\]\\]", Pattern.DOTALL);
    private static final Pattern REDIRECT_PATTERN = Pattern.compile("#redirect\\s*\\[\\[(.*?)\\]\\]", Pattern.CASE_INSENSITIVE);
+   private static final Pattern INDEX_NUMBER_PATTERN = Pattern.compile("\\(\\d+\\)$");
 
    protected abstract String getTagName();
    protected abstract IndexInstruction[] getIndexInstructions();
@@ -74,7 +75,7 @@ public abstract class BasePageIndexer
       if (namespace.endsWith(" talk") || namespace.equals("Talk")) {
          doc.addField(Utils.FLD_TALK_NAMESPACE, true);
       }
-      doc.addField(Utils.FLD_LAST_MOD_DATE, revTimestamp.substring(0, 8));
+      doc.addField(Utils.FLD_LAST_MOD_DATE, revTimestamp);
       doc.addField(Utils.FLD_PAGE_ID, pageId);
       doc.addField(Utils.FLD_POPULARITY, popularity);
       doc.addField(Utils.FLD_KEYWORDS, fullTitle); // re-index full title under keywords so we don't have to do dis-max queries on keywords+title
@@ -152,38 +153,20 @@ public abstract class BasePageIndexer
          doc.addField(Utils.FLD_TEXT_STORED, contents);
       }
 
-      // add title (may be overridden)
+      // add title (getTitleIndex may be overridden)
       doc.addField(Utils.FLD_TITLE, getTitleIndex(title, xml));
 
-      // add title sort value
-      // TODO pass in just title
+      // add title sort value (getTitleSort may be overridden)
       doc.addField(Utils.FLD_TITLE_SORT_VALUE, titleSorter.getSortValue(getTitleSort(fullTitle, xml)));
 
       // add any other custom fields
+      // Note that PersonPageIndexer and FamilyPageIndexer rely on this being run after getTItleSort
       addCustomFields(doc, title, xml, contents, redirTitle);
 
       return doc;
    }
 
-   private void appendAttr(String attr, StringBuilder buf) {
-      if (!Utils.isEmpty(attr)) {
-         if (buf.length() > 0) {
-            buf.append(" ");
-         }
-         buf.append(attr);
-      }
-   }
-
-   protected String getFullname(Element name) {
-      StringBuilder buf = new StringBuilder();
-      appendAttr(name.getAttributeValue("title_prefix"), buf);
-      appendAttr(name.getAttributeValue("given"), buf);
-      appendAttr(name.getAttributeValue("surname"), buf);
-      appendAttr(name.getAttributeValue("title_suffix"), buf);
-      return buf.toString();
-   }
-
-   protected String removeIndexNumber(String title) {
+   protected static String removeIndexNumber(String title) {
       return title.replaceAll("\\s*\\(\\d+\\)", "").trim();
    }
 

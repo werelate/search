@@ -3,11 +3,13 @@ package org.werelate.wiki;
 import org.apache.solr.common.SolrInputDocument;
 import org.werelate.util.DatabaseConnectionHelper;
 import org.werelate.util.Utils;
+import org.werelate.wiki.PersonPageIndexer;
 
 import java.sql.SQLException;
 
 import nu.xom.Document;
 import nu.xom.Nodes;
+import nu.xom.Element;
 
 /**
  * Created by Dallan Quass
@@ -62,6 +64,8 @@ public class FamilyPageIndexer extends BasePageIndexer
       new IndexInstruction(Utils.FLD_PRIMARY_IMAGE, "family/image[@primary='true']/@filename"),
    };
 
+   private String pageSortName = null;
+
    public FamilyPageIndexer(DatabaseConnectionHelper conn) throws SQLException
    {
       super(conn);
@@ -75,10 +79,66 @@ public class FamilyPageIndexer extends BasePageIndexer
       return INSTRUCTIONS;
    }
 
-   protected String getTitleSort(String title, Document xml) {
-      return removeIndexNumber(title);
+   /* Override base method. Note that this also stores the sort name for use in creating the surname index facet. */
+   protected String getTitleSort(String fullTitle, Document xml) {
+      pageSortName = getReversedFullname(fullTitle.substring(7), xml);
+      return "Family:" + pageSortName;
    }
 
+   protected static String getReversedFullname(String title, Document xml) {
+      String husbandName=null;
+      String wifeName=null;
+      Nodes nodes;
+
+      /* Construct husband and wife names based on name fields. If names not present, use their person titles. */
+      if (xml != null) {
+         nodes = xml.query("family/husband");
+         if (nodes.size() > 0) {
+            Element husband = (Element)nodes.get(0);
+            if (!Utils.isEmpty(PersonPageIndexer.getNameAttr(husband, "surname")) || !Utils.isEmpty(PersonPageIndexer.getNameAttr(husband, "given"))) {
+               husbandName = PersonPageIndexer.getReversedSortName(husband);
+            }
+            else if (husband.getAttributeValue("title")!=null) {
+               husbandName = PersonPageIndexer.getReversedTitle(husband.getAttributeValue("title"));
+            }
+         }
+         nodes = xml.query("family/wife");
+         if (nodes.size() > 0) {
+            Element wife = (Element)nodes.get(0);
+            if (!Utils.isEmpty(PersonPageIndexer.getNameAttr(wife, "surname")) || !Utils.isEmpty(PersonPageIndexer.getNameAttr(wife, "given"))) {
+               wifeName = PersonPageIndexer.getReversedSortName(wife);
+            }
+            else if (wife.getAttributeValue("title")!=null) {
+               wifeName = PersonPageIndexer.getReversedTitle(wife.getAttributeValue("title"));
+            }
+         }
+         // If found names for both husband and wife in the xml, return them.
+         if (husbandName != null && wifeName != null) {
+            return husbandName + " and " + wifeName;
+         }
+      }
+
+      /* If neither name nor title is in the XML for at least one spouse, get it from the family page title. If still unknown, set it to "Unknown". */
+      return getReversedTitle(title, husbandName, wifeName);
+   }
+
+   protected static String getReversedTitle(String title, String husbandName, String wifeName) {
+      String[] namePieces = title.split(" and ", 2);
+      if (husbandName==null && namePieces.length>0) {
+         husbandName = PersonPageIndexer.getReversedTitle(namePieces[0]);
+      }
+      if (wifeName==null && namePieces.length>1) {
+         wifeName = PersonPageIndexer.getReversedTitle(namePieces[1]);
+      }
+      if (husbandName==null) {
+         husbandName = "Unknown";
+      }
+      if (wifeName==null) {
+         wifeName = "Unknown";
+      }
+      return husbandName + " and " + wifeName;
+   }
+            
    // default husband and wife names from title in case they don't exist
    protected void addCustomFields(SolrInputDocument doc, String title, Document xml, String wikiContents, String redirTitle) {
       if (xml != null) {
@@ -100,10 +160,17 @@ public class FamilyPageIndexer extends BasePageIndexer
             doc.addField(Utils.FLD_WIFE_SURNAME, !Utils.isEmpty(namePieces[1][1]) ? namePieces[1][1] : Utils.UNKNOWN_NAME);
          }
 
+         // store fullname (surname first for each spouse)
+         doc.addField(Utils.FLD_FULLNAME_STORED, getReversedFullname(title, xml));
+
          // store unsourced
          if (isUnsourced(xml, wikiContents)) {
             doc.addField(Utils.FLD_UNSOURCED, true);
          }
+         
+         /* get surname index facet (first alphabetic letter of the page sort name) 
+            Note: This relies on getTitleSort being run first. */
+         doc.addField(Utils.FLD_SURNAME_INDEX_FACET, PersonPageIndexer.getSurnameIndex(pageSortName));
       }
    }
 }

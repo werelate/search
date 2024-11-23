@@ -377,7 +377,7 @@
     <field name="Place1"           type="string"    indexed="true"  stored="false"  multiValued="true"/>
     <field name="Place2"           type="string"    indexed="true"  stored="false"  multiValued="true"/>
 
-    <field name="LastModDate"      type="integer"   indexed="true"  stored="true"  required="true" />
+    <field name="LastModDate"      type="double"   indexed="true"  stored="true"  required="true" />
     <field name="PageId"           type="string"    indexed="true"  stored="true"  required="true" />
     <field name="User"             type="string"    indexed="true"  stored="false" multiValued="true" />
     <field name="UserStored"       type="hlstring"  indexed="false" stored="true"  multiValued="true" />
@@ -409,8 +409,10 @@
     <field name="PersonStateFacet"     type="facettext"  indexed="true"  stored="false" multiValued="true" />
     <field name="PersonCenturyFacet"   type="facettext"  indexed="true"  stored="false" multiValued="true" />
     <field name="PersonDecadeFacet"    type="facettext"  indexed="true"  stored="false" multiValued="true" />
+    <field name="SurnameIndexFacet"   type="facettext"  indexed="true"  stored="false" multiValued="true" />
     <field name="ParentFamilyTitle"    type="hltext" indexed="false" stored="true" multiValued="true" />
     <field name="SpouseFamilyTitle"    type="hltext" indexed="false" stored="true" multiValued="true" />
+    <field name="PersonGender"         type="hltext" indexed="true"  stored="true" multivalued="false" />
     <field name="PersonBirthDateStored" type="hltext" indexed="false" stored="true" />
     <field name="PersonChrDateStored"  type="hltext" indexed="false" stored="true" multiValued="true" />
     <field name="PersonDeathDateStored"  type="hltext" indexed="false" stored="true" />
@@ -473,6 +475,7 @@
     <field name="OtherPlace"       type="place"     indexed="true"  stored="false" multiValued="true" />
     <field name="SurnameStored"    type="hltext"    indexed="false" stored="true" multiValued="true" />
     <field name="FullnameStored"   type="hltext"    indexed="false" stored="true" multiValued="true" />
+    <field name="AltnameStored"    type="hltext"    indexed="false" stored="true" multiValued="true" />
     <field name="PlaceStored"      type="hltext"    indexed="false" stored="true" multiValued="true" />
     <field name="PrimaryImage"     type="string"    indexed="false" stored="true" />
     <field name="FromYear"         type="string"    indexed="false" stored="true" />
