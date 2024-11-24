@@ -393,7 +393,7 @@ public class Indexer
    public void commit() throws IOException, SQLException, SolrServerException
    {
       logger.info("Committing index");
-      commitWithTimeout();
+      commitWithTimeout(30);
 
       logger.info("Saving checkpoints");
       irCm.saveCheckpoint();
@@ -403,7 +403,7 @@ public class Indexer
       apCm.saveCheckpoint();
    }
 
-   public void commitWithTimeout()
+   public void commitWithTimeout(int seconds)
    {
       ExecutorService executor = Executors.newCachedThreadPool();
       Callable<Object> task = new Callable<Object>() {
@@ -421,7 +421,7 @@ public class Indexer
       };
       Future<Object> future = executor.submit(task);
       try {
-         Object result = future.get(30, TimeUnit.SECONDS);
+         Object result = future.get(seconds, TimeUnit.SECONDS);
       } catch (TimeoutException e) {
          logger.info("ERROR Commit timeout exception: " + e);
          System.exit(1);
@@ -504,7 +504,7 @@ public class Indexer
                   indexBatch.clear();
                }
             }
-            commitWithTimeout();
+            commitWithTimeout(60);
             commitNeeded = false;
             logger.info("committed index page_id="+apCm.getCheckpoint());
          } while (!aptg.isAtEnd());
@@ -516,7 +516,7 @@ public class Indexer
       }
       finally {
          if (commitNeeded) {
-            commitWithTimeout();
+            commitWithTimeout(60);
             logger.info("committed index page_id="+apCm.getCheckpoint());
          }
          cleanup();
