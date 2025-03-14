@@ -10,8 +10,12 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+
+import org.werelate.util.Utils;
 
 import java.util.logging.Logger;
 
@@ -62,7 +66,14 @@ class WeRelateQParser extends QParser {
          parser.setDefaultOperator(sortStr == null ? QueryParser.Operator.OR : QueryParser.Operator.AND);
       }
 
-      Query q = parser.parse(qstr);
+      Query q;
+      try {
+         q = parser.parse(qstr);
+      }
+      catch (Exception e) {
+         logger.warning("PARSE ERROR="+e.getMessage()+" QUERY="+qstr);
+         q = new TermQuery(new Term(Utils.FLD_KEYWORDS, "invalidquery"));
+      }
       // force into a boolean query
       if (!(q instanceof BooleanQuery)) {
          BooleanQuery bq = new BooleanQuery(true);
