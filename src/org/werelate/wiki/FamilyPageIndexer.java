@@ -3,6 +3,7 @@ package org.werelate.wiki;
 import org.apache.solr.common.SolrInputDocument;
 import org.werelate.util.DatabaseConnectionHelper;
 import org.werelate.util.Utils;
+import org.werelate.util.SharedUtils;
 import org.werelate.wiki.PersonPageIndexer;
 
 import java.sql.SQLException;
@@ -142,7 +143,7 @@ public class FamilyPageIndexer extends BasePageIndexer
    // default husband and wife names from title in case they don't exist
    protected void addCustomFields(SolrInputDocument doc, String title, Document xml, String wikiContents, String redirTitle) {
       if (xml != null) {
-         String[][] namePieces = getFamilyNamePieces(removeIndexNumber(title));
+         String[][] namePieces = getFamilyNamePieces(SharedUtils.removeIndexNumber(title));
          Nodes nodes = xml.query(XPATH_HUSBAND_GIVENNAME);
          if (nodes.size() == 0) {
             doc.addField(Utils.FLD_HUSBAND_GIVENNAME, !Utils.isEmpty(namePieces[0][0]) ? namePieces[0][0] : Utils.UNKNOWN_NAME);

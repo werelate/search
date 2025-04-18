@@ -3,6 +3,7 @@ package org.werelate.wiki;
 import org.apache.solr.common.SolrInputDocument;
 import org.werelate.util.DatabaseConnectionHelper;
 import org.werelate.util.Utils;
+import org.werelate.util.SharedUtils;
 
 import java.sql.SQLException;
 
@@ -41,7 +42,7 @@ public class ImagePageIndexer extends BasePageIndexer
       if (xml != null) {
          Nodes nodes = xml.query("image_data/family/@title");
          for (int i = 0; i < nodes.size(); i++) {
-            String familyTitle = removeIndexNumber(nodes.get(i).getValue());
+            String familyTitle = SharedUtils.removeIndexNumber(nodes.get(i).getValue());
             doc.addField(Utils.FLD_FULLNAME_STORED, familyTitle);
             String[][] namePieces = getFamilyNamePieces(familyTitle);
             for (int j = 0; j < 2; j++) {

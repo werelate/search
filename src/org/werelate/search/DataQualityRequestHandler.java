@@ -51,7 +51,7 @@ public class DataQualityRequestHandler extends RequestHandlerBase {
 
       // Get issues for a person page, and variables needed to determine whether the person might be living.
       if (namespace.equals("Person")) {
-         String personTitle = params.get("pTitle");
+         String personTitle = params.get("ptitle");
          PersonDQAnalysis personDQAnalysis = new PersonDQAnalysis(root, personTitle);
          rsp.add("earliestBirth", personDQAnalysis.getEarliestBirth());
          rsp.add("latestBirth", personDQAnalysis.getLatestBirth());
