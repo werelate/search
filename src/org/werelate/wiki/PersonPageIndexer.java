@@ -4,6 +4,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.folg.names.search.Normalizer;
 import org.werelate.util.DatabaseConnectionHelper;
 import org.werelate.util.Utils;
+import org.werelate.util.SharedUtils;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -134,7 +135,7 @@ public class PersonPageIndexer extends BasePageIndexer
       If both given and surname are unknown, return just "Unknown". */
    protected static String getReversedTitle(String titleName) {
       StringBuilder buf = new StringBuilder();
-      String[] namePieces = removeIndexNumber(titleName).split(" ", 2);
+      String[] namePieces = SharedUtils.removeIndexNumber(titleName).split(" ", 2);
       if (namePieces.length>1 && !namePieces[1].toLowerCase().equals("unknown")) {
          appendAttr(namePieces[1], buf);
       }
@@ -236,7 +237,7 @@ public class PersonPageIndexer extends BasePageIndexer
          // get parents names
          Nodes nodes = xml.query("person/child_of_family/@title");
          for (int i = 0; i < nodes.size(); i++) {
-            String[][] namePieces = getFamilyNamePieces(removeIndexNumber(nodes.get(i).getValue()));
+            String[][] namePieces = getFamilyNamePieces(SharedUtils.removeIndexNumber(nodes.get(i).getValue()));
             for (int j = 0; j < 2; j++) {
                for (int k = 0; k < 2; k++) {
                   doc.addField(PARENT_NAMES[j][k], !Utils.isEmpty(namePieces[j][k]) ? namePieces[j][k] : Utils.UNKNOWN_NAME);
@@ -264,7 +265,7 @@ public class PersonPageIndexer extends BasePageIndexer
             int j = ("M".equals(gender)) ? 1 : 0;
             nodes = xml.query("person/spouse_of_family/@title");
             for (int i = 0; i < nodes.size(); i++) {
-               String[][] namePieces = getFamilyNamePieces(removeIndexNumber(nodes.get(i).getValue()));
+               String[][] namePieces = getFamilyNamePieces(SharedUtils.removeIndexNumber(nodes.get(i).getValue()));
                doc.addField(Utils.FLD_SPOUSE_GIVENNAME, !Utils.isEmpty(namePieces[j][0]) ? namePieces[j][0] : Utils.UNKNOWN_NAME);
                String spouseSurname = !Utils.isEmpty(namePieces[j][1]) ? namePieces[j][1] : Utils.UNKNOWN_NAME;
                doc.addField(Utils.FLD_SPOUSE_SURNAME, spouseSurname);
@@ -285,7 +286,7 @@ public class PersonPageIndexer extends BasePageIndexer
          }
 
          // default person name if needed
-         String[] names = removeIndexNumber(title).split(" ", 2);
+         String[] names = SharedUtils.removeIndexNumber(title).split(" ", 2);
          nodes = xml.query(XPATH_PERSON_SURNAME);
          if (nodes.size() == 0) {
             doc.addField(Utils.FLD_PERSON_SURNAME, names.length == 2 ? names[1] : Utils.UNKNOWN_NAME);

@@ -166,10 +166,6 @@ public abstract class BasePageIndexer
       return doc;
    }
 
-   protected static String removeIndexNumber(String title) {
-      return title.replaceAll("\\s*\\(\\d+\\)", "").trim();
-   }
-
    protected String[][] getFamilyNamePieces(String titleSansIndexNumber) {
       String[][] familyNamePieces = new String[2][2];
       for (int i = 0; i < 2; i++) for (int j = 0; j < 2; j++) familyNamePieces[i][j] = null;
