@@ -51,28 +51,20 @@ public class PlaceSearcher
            "montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|oregon|pennsylvania|rhode island|"+
            "south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming";
    private static final String USSTATES = USSTATES_MINUS_GEORGIA+"|georgia";
-   private static final Pattern[] FIX_PATTERNS = {
-      Pattern.compile("^\\d[^,]*,"),                             // remove addresses
-      Pattern.compile("\\w*\\d\\w*"),                            // remove words containing numbers (e.g., UK, Can zipcodes)
+   private static final Pattern[] FIX_PATTERNS_CLEANSE = {
       Pattern.compile(",(\\S)"),                                 // space after comma
       Pattern.compile("\\s\\s+"),                                // remove multiple spaces
-      Pattern.compile("<|&lt;|>|&gt;"),                          // remove < >
+      Pattern.compile(", (, )+"),                                // remove multiple commas
       Pattern.compile("(^[, ]+)|([, ]+$)"),                      // remove preceding or following commas
-      Pattern.compile(", (, )+"),                                // remove double commas
-      Pattern.compile("^(of|near|prob\\.?)\\s+", Pattern.CASE_INSENSITIVE), // remove preceding of
       Pattern.compile("\\s+tws?p\\.?,", Pattern.CASE_INSENSITIVE), // expand into (township)
       Pattern.compile("\\s+par\\.?,", Pattern.CASE_INSENSITIVE), // expand into parish
       Pattern.compile("\\s+co\\.?,", Pattern.CASE_INSENSITIVE),  // expand into county
       Pattern.compile("(^|, )("+USSTATES_MINUS_GEORGIA+")$", Pattern.CASE_INSENSITIVE), // add united states
       Pattern.compile("(^|, )u\\.?s\\.?(a\\.?)?$", Pattern.CASE_INSENSITIVE), // expand into united states
    };
-   private static final String[] FIX_REPLACEMENTS = {
-      "",
-      "",
+   private static final String[] FIX_REPLACEMENTS_CLEANSE = {
       ", $1",
       " ",
-      "",
-      "",
       ", ",
       "",
       " (township),",
@@ -81,11 +73,37 @@ public class PlaceSearcher
       "$1$2, United States",
       "$1United States",
    };
+   private static final Pattern[] FIX_PATTERNS_END = {
+      Pattern.compile("(<|&lt;)/?s(>|&gt;)|(<|&lt;)/?b(>|&gt;)|(<|&lt;)/?u(>|&gt;)|(<|&lt;)/?i(>|&gt;)"), // remove formating tags
+      Pattern.compile("<|&lt;|>|&gt;"),                          // remove < > (implying uncertainty)
+      Pattern.compile(", (\\d+|\\d+-\\d+)$"),                    // remove terminating US zipcodes 
+      Pattern.compile(", (\\d+|\\d+-\\d+), "),                   // remove US zipcodes prior to end of string
+      Pattern.compile("(^|, )u\\.?s\\.?(a\\.?)?$", Pattern.CASE_INSENSITIVE), // expand into united states - repeat after removing tags
+   };
+   private static final String[] FIX_REPLACEMENTS_END = {
+      "",
+      "",
+      "",
+      ", ",
+      "$1United States",
+   };
    private static final Pattern[] FIX_PATTERNS_US = {
       Pattern.compile("\\s+(county|parish), ("+USSTATES+")\\b", Pattern.CASE_INSENSITIVE), // remove county/parish for US places
+      Pattern.compile("(ward|district|justice precinct|precinct)\\s\\d+, (.*, ("+USSTATES+"))\\b", Pattern.CASE_INSENSITIVE), // remove ward #, etc for US places
    };
    private static final String[] FIX_REPLACEMENTS_US = {
       ", $2",
+      "$2",
+   };
+   private static final Pattern[] FIX_PATTERNS_DETAIL = {
+      Pattern.compile("^(of|near|prob\\.?|poss\\.?|probably|possibly)\\s+", Pattern.CASE_INSENSITIVE), // remove preceding modifiers
+      Pattern.compile("^\\d[^,]*,"),                             // remove addresses
+      Pattern.compile("\\w*\\d\\w*"),                            // remove words containing numbers (e.g., UK, Can postal codes)
+   };
+   private static final String[] FIX_REPLACEMENTS_DETAIL = {
+      "",
+      "",
+      "",
    };
    private static final Pattern USSTATES_PATTERN = Pattern.compile("("+USSTATES+")");
 
@@ -124,13 +142,23 @@ public class PlaceSearcher
       }
    }
 
+   private static String cleanseText(String placeText) {
+      String result = placeText;
+      for (int i = 0; i < FIX_PATTERNS_CLEANSE.length; i++) {
+         Matcher m = FIX_PATTERNS_CLEANSE[i].matcher(result);
+         result = m.replaceAll(FIX_REPLACEMENTS_CLEANSE[i]);
+      }
+      return result;
+   }
+
    private static String getLookupText(String placeText, boolean applyFixes) {
       String result = placeText;
       if (applyFixes) {
-         // clean place strings
-         for (int i = 0; i < FIX_PATTERNS.length; i++) {
-            Matcher m = FIX_PATTERNS[i].matcher(result);
-            result = m.replaceAll(FIX_REPLACEMENTS[i]);
+         result = cleanseText(placeText);
+         // remove info that might be after a US state abbrev - must be done before expanding US state abbrevs
+         for (int i = 0; i < FIX_PATTERNS_END.length; i++) {
+            Matcher m = FIX_PATTERNS_END[i].matcher(result);
+            result = m.replaceAll(FIX_REPLACEMENTS_END[i]);
          }
          // if place ends with US State abbrev, append state name, united states
          int pos = result.lastIndexOf(',');
@@ -153,10 +181,16 @@ public class PlaceSearcher
                result = buf.toString();
             }
          }
-         // apply US patterns
+         // apply US patterns - must be done after expanding US state abbrevs and before removing addresses (because of ward/etc #)
          for (int i = 0; i < FIX_PATTERNS_US.length; i++) {
             Matcher m = FIX_PATTERNS_US[i].matcher(result);
             result = m.replaceAll(FIX_REPLACEMENTS_US[i]);
+         }
+
+         // remove addresses and modifiers such as "prob."
+         for (int i = 0; i < FIX_PATTERNS_DETAIL.length; i++) {
+            Matcher m = FIX_PATTERNS_DETAIL[i].matcher(result);
+            result = m.replaceAll(FIX_REPLACEMENTS_DETAIL[i]);
          }
       }
       return result;
