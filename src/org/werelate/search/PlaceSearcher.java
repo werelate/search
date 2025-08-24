@@ -59,6 +59,8 @@ public class PlaceSearcher
       Pattern.compile("\\s+tws?p\\.?,", Pattern.CASE_INSENSITIVE), // expand into (township)
       Pattern.compile("\\s+par\\.?,", Pattern.CASE_INSENSITIVE), // expand into parish
       Pattern.compile("\\s+co\\.?,", Pattern.CASE_INSENSITIVE),  // expand into county
+      Pattern.compile("^prob\\.?\\s+", Pattern.CASE_INSENSITIVE),  // expand into probably
+      Pattern.compile("^poss\\.?\\s+", Pattern.CASE_INSENSITIVE),  // expand into possibly
       Pattern.compile("(^|, )("+USSTATES_MINUS_GEORGIA+")$", Pattern.CASE_INSENSITIVE), // add united states
       Pattern.compile("(^|, )u\\.?s\\.?(a\\.?)?$", Pattern.CASE_INSENSITIVE), // expand into united states
    };
@@ -70,8 +72,16 @@ public class PlaceSearcher
       " (township),",
       " Parish,",
       " County,",
+      "probably ",
+      "possibly ",
       "$1$2, United States",
       "$1United States",
+   };
+   private static final Pattern[] FIX_PATTERNS_CLEANSE_US = {
+      Pattern.compile("\\s+(county|parish), ("+USSTATES+")\\b", Pattern.CASE_INSENSITIVE), // remove county/parish for US places
+   };
+   private static final String[] FIX_REPLACEMENTS_CLEANSE_US = {
+      ", $2",
    };
    private static final Pattern[] FIX_PATTERNS_END = {
       Pattern.compile("(<|&lt;)/?s(>|&gt;)|(<|&lt;)/?b(>|&gt;)|(<|&lt;)/?u(>|&gt;)|(<|&lt;)/?i(>|&gt;)"), // remove formating tags
@@ -88,19 +98,19 @@ public class PlaceSearcher
       "$1United States",
    };
    private static final Pattern[] FIX_PATTERNS_US = {
-      Pattern.compile("\\s+(county|parish), ("+USSTATES+")\\b", Pattern.CASE_INSENSITIVE), // remove county/parish for US places
       Pattern.compile("(ward|district|justice precinct|precinct)\\s\\d+, (.*, ("+USSTATES+"))\\b", Pattern.CASE_INSENSITIVE), // remove ward #, etc for US places
    };
    private static final String[] FIX_REPLACEMENTS_US = {
-      ", $2",
       "$2",
    };
    private static final Pattern[] FIX_PATTERNS_DETAIL = {
       Pattern.compile("^(of|near|prob\\.?|poss\\.?|probably|possibly)\\s+", Pattern.CASE_INSENSITIVE), // remove preceding modifiers
       Pattern.compile("^\\d[^,]*,"),                             // remove addresses
       Pattern.compile("\\w*\\d\\w*"),                            // remove words containing numbers (e.g., UK, Can postal codes)
+      Pattern.compile("([, ]+$)"),                               // remove following commas - repeat after removing postal codes
    };
    private static final String[] FIX_REPLACEMENTS_DETAIL = {
+      "",
       "",
       "",
       "",
@@ -151,6 +161,53 @@ public class PlaceSearcher
       return result;
    }
 
+   // Note: cleanseUS is called both for the lookup name and the display name, so has to take into
+   // consideration zip code, which might be part of the display name.
+   private static String cleanseUS(String placeText) {
+      String result = placeText;
+      String[] levels = placeText.split("\\s*,\\s*");
+
+      // if place has US state abbrev at end or with only "united states"/"usa" and/or zip code after it,
+      // convert it to state name and ensure place name includes "united states".
+      String zip=null;
+      int possStateLevel = levels.length-1;
+      for (int i=levels.length-1; i>=levels.length-3 && i>=0; i--) {
+         if (levels[i].trim().equalsIgnoreCase("united states") || levels[i].trim().toLowerCase().matches("^u\\.?s\\.?(a\\.?)?$") ||
+                  levels[i].trim().matches("^(\\d+|\\d+-\\d+)$")) {
+            possStateLevel--;
+            if (levels[i].trim().matches("^(\\d+|\\d+-\\d+)$")) {
+               zip = levels[i].trim();
+            }
+         }
+         else {
+            break;
+         }
+      }
+      String stateName = Utils.getUSStateFromAbbrev(levels[possStateLevel].trim());
+      if (stateName != null) {
+         StringBuilder buf = new StringBuilder();
+         for (int i=0; i<possStateLevel; i++) {
+            buf.append(levels[i]);
+            buf.append(", ");
+         }
+         buf.append(stateName);
+         buf.append(", United States");
+         // zip code placed at the end so that subsequent code to expand the display place name works
+         if (zip!=null) {
+            buf.append(", ");
+            buf.append(zip);
+         }
+         result = buf.toString();
+      }
+
+      // further cleansing
+      for (int i = 0; i < FIX_PATTERNS_CLEANSE_US.length; i++) {
+         Matcher m = FIX_PATTERNS_CLEANSE_US[i].matcher(result);
+         result = m.replaceAll(FIX_REPLACEMENTS_CLEANSE_US[i]);
+      }
+      return result;
+   }
+
    private static String getLookupText(String placeText, boolean applyFixes) {
       String result = placeText;
       if (applyFixes) {
@@ -160,27 +217,9 @@ public class PlaceSearcher
             Matcher m = FIX_PATTERNS_END[i].matcher(result);
             result = m.replaceAll(FIX_REPLACEMENTS_END[i]);
          }
-         // if place ends with US State abbrev, append state name, united states
-         int pos = result.lastIndexOf(',');
-         int endPos = result.length();
-         if (pos >= 0 && pos < result.length()-1 && result.substring(pos+1).trim().equalsIgnoreCase("united states")) {
-            endPos = pos;
-            pos = result.lastIndexOf(',', pos-1);
-         }
-         if (pos < result.length()-1) {
-            String lastLevel = result.substring(pos+1,endPos).trim();
-            lastLevel = Utils.getUSStateFromAbbrev(lastLevel);
-            if (lastLevel != null) {
-               StringBuilder buf = new StringBuilder();
-               if (pos > 0) {
-                  buf.append(result.substring(0,pos));
-                  buf.append(", ");
-               }
-               buf.append(lastLevel.toLowerCase());
-               buf.append(", United States");
-               result = buf.toString();
-            }
-         }
+         // expand US state abbrevs and get rid of "county", "parish"
+         result = cleanseUS(result);
+
          // apply US patterns - must be done after expanding US state abbrevs and before removing addresses (because of ward/etc #)
          for (int i = 0; i < FIX_PATTERNS_US.length; i++) {
             Matcher m = FIX_PATTERNS_US[i].matcher(result);
@@ -193,7 +232,7 @@ public class PlaceSearcher
             result = m.replaceAll(FIX_REPLACEMENTS_DETAIL[i]);
          }
       }
-      return result;
+      return result.trim();
    }
 
    public PlaceSearcher(SolrIndexSearcher searcher, Analyzer analyzer) {
@@ -614,11 +653,76 @@ public class PlaceSearcher
     * @return array of size 2; [0] = standardized text; [1] = error
     */
    public String[] standardize(String placeText, String defaultCountry) {
+      // Extract place name and display name from input.
+      // Note: ^ is a stand-in for normal pipe (|) on strings passed to this function.
+      // If no pipe (^), place name and display name are both the full input string.
+      String[] splitText = placeText.split("\\^",2);
+      String placeName = splitText[0];
+      String displayName = splitText.length == 1 ? placeName : splitText[1];
+
+       // New place name is first match on existing place name. 
+      // If no match, try again with display name (if different). This corrects earlier issues with Ward, District, etc.
       String[] result = new String[2];
-      MatchResult matchResult = getMatchResult(placeText, defaultCountry);
+      MatchResult matchResult = getMatchResult(placeName, defaultCountry);
+      if (matchResult.error != null && matchResult.error.equals("missing") && !displayName.equals(placeName)) {
+         matchResult = getMatchResult(displayName, defaultCountry);
+      }
       result[0] = matchResult.titles != null && matchResult.titles.length > 0 ? matchResult.titles[0] : "";
+
+      // Display name is returned as part of the string only if:
+      // - it is an alternate name or uses an alternate jursidiction from the Place page title and/or
+      // - it is ambiguous (more than one matching Place page) in case the Place page is the incorrect one and/or
+      // - it has additional info (such as an address, ward #, qualifier) not in the Place page title
+      displayName = cleanseUS(cleanseText(displayName));  // cleanse displayName, keeping extra info such as address
+      if (displayName.equalsIgnoreCase(result[0])) {      // if exact match to Place page title, remove display name
+         displayName = "";
+      }
+
+      // If display name is not an exact match to the Place page title:
+      // - determine if it is using an alternate name or jurisdiction
+      // - determine if it is ambiguous - that is, it matches more than one Place page
+      // If neither of the above, use info from Place page title to expand it (e.g., add county name),
+      // and then check again to see if it is an exact match to the Place page title.
+      if (!displayName.equals("")) {
+         String strippedDisplayName = getLookupText(displayName, true);
+         if (isPlaceNameConsistent(strippedDisplayName, result[0])) {
+            LookupResult lr = lookupPlace(strippedDisplayName, MAX_MATCH_RESULTS, false, false);
+            if (lr.docs != null && lr.docs.length == 1) {  // not ambiguous
+               displayName = displayName.replace(strippedDisplayName, result[0]);
+               if (displayName.equalsIgnoreCase(result[0])) {  // if exact match to Place page title, remove display name
+                  displayName = "";
+               }
+            }
+         }
+         if (!displayName.equals("")) {
+            result[0] += (result[0].equals("") ? "" : "^") + displayName;
+         }
+      }
+
       result[1] = matchResult.error;
       return result;
+   }
+
+   // Checks to see if a place display name is fully consistent with the Place page title - 
+   // that is, the names at all levels match names in the Place page title, and are not
+   // alternate names or jurisdictions.
+   private boolean isPlaceNameConsistent(String s1, String s2) {
+      String[] s1Levels = s1.split("\\s*,\\s*");
+      String[] s2Levels = s2.split("\\s*,\\s*");
+
+      for (int i=0; i<s1Levels.length; i++) {
+         boolean found=false;
+         for (int j=i; j<s2Levels.length; j++) {      // must match a name at same or later level
+            if (s1Levels[i].equalsIgnoreCase(s2Levels[j])) {
+               found=true;
+               continue;
+            }
+         }
+        if (found==false) {
+            return false;
+         }
+      }
+      return true;
    }
 
    public String[] getMatches(String placeText) {
