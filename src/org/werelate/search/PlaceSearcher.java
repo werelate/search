@@ -63,6 +63,7 @@ public class PlaceSearcher
       Pattern.compile("^poss\\.?\\s+", Pattern.CASE_INSENSITIVE),  // expand into possibly
       Pattern.compile("(^|, )("+USSTATES_MINUS_GEORGIA+")$", Pattern.CASE_INSENSITIVE), // add united states
       Pattern.compile("(^|, )u\\.?s\\.?(a\\.?)?$", Pattern.CASE_INSENSITIVE), // expand into united states
+      Pattern.compile("(^|, )united states of america$", Pattern.CASE_INSENSITIVE),  // replace with united states
    };
    private static final String[] FIX_REPLACEMENTS_CLEANSE = {
       ", $1",
@@ -75,6 +76,7 @@ public class PlaceSearcher
       "probably ",
       "possibly ",
       "$1$2, United States",
+      "$1United States",
       "$1United States",
    };
    private static final Pattern[] FIX_PATTERNS_CLEANSE_US = {
@@ -685,12 +687,15 @@ public class PlaceSearcher
       // and then check again to see if it is an exact match to the Place page title.
       if (!displayName.equals("")) {
          String strippedDisplayName = getLookupText(displayName, true);
-         if (isPlaceNameConsistent(strippedDisplayName, result[0])) {
-            LookupResult lr = lookupPlace(strippedDisplayName, MAX_MATCH_RESULTS, false, false);
-            if (lr.docs != null && lr.docs.length == 1) {  // not ambiguous
-               displayName = displayName.replace(strippedDisplayName, result[0]);
-               if (displayName.equalsIgnoreCase(result[0])) {  // if exact match to Place page title, remove display name
-                  displayName = "";
+         // If strippedDisplayName = Place page title, no further standardization is possible - just append the displayName.
+         if (!strippedDisplayName.equals(result[0])) {
+            if (isPlaceNameConsistent(strippedDisplayName, result[0])) {
+               LookupResult lr = lookupPlace(strippedDisplayName, MAX_MATCH_RESULTS, false, false);
+               if (lr.docs != null && lr.docs.length == 1) {  // not ambiguous
+                  displayName = displayName.replace(strippedDisplayName, result[0]);
+                  if (displayName.equalsIgnoreCase(result[0])) {  // if exact match to Place page title, remove display name
+                     displayName = "";
+                  }
                }
             }
          }
