@@ -185,21 +185,23 @@ public class PlaceSearcher
             break;
          }
       }
-      String stateName = Utils.getUSStateFromAbbrev(levels[possStateLevel].trim());
-      if (stateName != null) {
-         StringBuilder buf = new StringBuilder();
-         for (int i=0; i<possStateLevel; i++) {
-            buf.append(levels[i]);
-            buf.append(", ");
+      if (possStateLevel>=0) {
+         String stateName = Utils.getUSStateFromAbbrev(levels[possStateLevel].trim());
+         if (stateName != null) {
+            StringBuilder buf = new StringBuilder();
+            for (int i=0; i<possStateLevel; i++) {
+               buf.append(levels[i]);
+               buf.append(", ");
+            }
+            buf.append(stateName);
+            buf.append(", United States");
+            // zip code placed at the end so that subsequent code to expand the display place name works
+            if (zip!=null) {
+               buf.append(", ");
+               buf.append(zip);
+            }
+            result = buf.toString();
          }
-         buf.append(stateName);
-         buf.append(", United States");
-         // zip code placed at the end so that subsequent code to expand the display place name works
-         if (zip!=null) {
-            buf.append(", ");
-            buf.append(zip);
-         }
-         result = buf.toString();
       }
 
       // further cleansing
