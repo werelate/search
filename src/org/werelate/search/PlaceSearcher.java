@@ -56,6 +56,8 @@ public class PlaceSearcher
       Pattern.compile("\\s\\s+"),                                // remove multiple spaces
       Pattern.compile(", (, )+"),                                // remove multiple commas
       Pattern.compile("(^[, ]+)|([, ]+$)"),                      // remove preceding or following commas
+      Pattern.compile("\\["),                                    // replace brackets (which cause display problems) with parentheses
+      Pattern.compile("\\]"),
       Pattern.compile("\\s+tws?p\\.?,", Pattern.CASE_INSENSITIVE), // expand into (township)
       Pattern.compile("\\s+par\\.?,", Pattern.CASE_INSENSITIVE), // expand into parish
       Pattern.compile("\\s+co\\.?,", Pattern.CASE_INSENSITIVE),  // expand into county
@@ -70,6 +72,8 @@ public class PlaceSearcher
       " ",
       ", ",
       "",
+      "(",
+      ")",
       " (township),",
       " Parish,",
       " County,",
