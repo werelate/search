@@ -388,7 +388,7 @@
          MarriageDateStored,MarriagePlaceStored,BannsDateStored,BannsPlaceStored,
          UserStored,SurnameStored,FullnameStored,AltnameStored,PlaceStored,
          PlaceType,SourceSubjectStored,SourceAvailabilityStored,AuthorStored,SourceTitleStored,
-         TextStored
+         AltTitleStored,TextStored
       </str>
       <str name="fl">TitleStored,
          PersonBirthDateStored,PersonBirthPlaceStored,PersonDeathDateStored,PersonDeathPlaceStored,
@@ -397,7 +397,7 @@
          MarriageDateStored,MarriagePlaceStored,BannsDateStored,BannsPlaceStored,
          UserStored,SurnameStored,FullnameStored,AltnameStored,PlaceStored,
          PlaceType,SourceSubjectStored,SourceAvailabilityStored,AuthorStored,SourceTitleStored,
-         PageId,NamespaceStored,LastModDate,PrimaryImage,FromYear,ToYear,SourceSubSubject,
+         AltTitleStored,PageId,NamespaceStored,LastModDate,PrimaryImage,FromYear,ToYear,SourceSubSubject,
          HusbandBirthDateStored,HusbandChrDateStored,HusbandDeathDateStored,HusbandBurialDateStored,
          WifeBirthDateStored,WifeChrDateStored,WifeDeathDateStored,WifeBurialDateStored,
          Latitude,Longitude,score
@@ -444,6 +444,7 @@
       <str name="f.SourceAvailabilityStored.hl.alternateField">SourceAvailabilityStored</str>
       <str name="f.AuthorStored.hl.alternateField">AuthorStored</str>
       <str name="f.SourceTitleStored.hl.alternateField">SourceTitleStored</str>
+      <str name="f.AltTitleStored.hl.alternateField">AltTitleStored</str>
     </lst>
 
     <arr name="components">
