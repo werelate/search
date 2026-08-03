@@ -490,6 +490,7 @@
     <field name="SourceAvailabilityStored" type="hlstring" indexed="false" stored="true" multiValued="true" />
     <field name="AuthorStored"      type="hltext"    indexed="false" stored="true" multiValued="true" />
     <field name="SourceTitleStored" type="hltext"    indexed="false" stored="true" />
+    <field name="AltTitleStored"    type="hltext"    indexed="false" stored="true" multiValued="true" />
 
     <!-- the following fields are used only for surnames/givennames -->
     <field name="SurnameTitle"     type="surname" indexed="true" stored="false" />

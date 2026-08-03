@@ -21,6 +21,7 @@ public class SourcePageIndexer extends BasePageIndexer
       new IndexInstruction(Utils.FLD_PLACE_STORED, "source/place", null, IndexInstruction.FILTER_REMOVE_PRE_BAR),
       new IndexInstruction(Utils.FLD_AUTHOR, "source/author", null, IndexInstruction.FILTER_REMOVE_LINK),
       new IndexInstruction(Utils.FLD_SOURCE_TITLE_STORED, "source/source_title"),
+      new IndexInstruction(Utils.FLD_ALT_TITLE_STORED, "source/alternate_title"),
       new IndexInstruction(Utils.FLD_SOURCE_SUBJECT, "source/source_category"),
       new IndexInstruction(Utils.FLD_SOURCE_SUBJECT, "source/subject"),
       new IndexInstruction(Utils.FLD_SOURCE_AVAILABILITY, "source/repository/@availability"),
@@ -47,6 +48,11 @@ public class SourcePageIndexer extends BasePageIndexer
       }
       if (xml != null) {
          Nodes nodes = xml.query("source/source_title");
+         for (int i = 0; i < nodes.size(); i++) {
+            buf.append(" ");
+            buf.append(nodes.get(i).getValue());
+         }
+         nodes = xml.query("source/alternate_title");
          for (int i = 0; i < nodes.size(); i++) {
             buf.append(" ");
             buf.append(nodes.get(i).getValue());

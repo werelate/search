@@ -152,6 +152,7 @@ public class Utils
    public static final String FLD_SOURCE_AVAILABILITY_STORED = "SourceAvailabilityStored";
    public static final String FLD_AUTHOR_STORED = "AuthorStored";
    public static final String FLD_SOURCE_TITLE_STORED = "SourceTitleStored";
+   public static final String FLD_ALT_TITLE_STORED = "AltTitleStored";
 
    public static final String FLD_SURNAME_TITLE = "SurnameTitle";
    public static final String FLD_GIVENNAME_TITLE = "GivennameTitle";
@@ -170,8 +171,8 @@ public class Utils
    public static final String FLD_PLACE = "Place";
 
    public static final Map<String,String[]> HIGHLIGHT_FIELDS = new HashMap<String,String[]>();
-   static {
-      HIGHLIGHT_FIELDS.put(FLD_TITLE, new String[]{FLD_TITLE_STORED});
+   static {   
+      HIGHLIGHT_FIELDS.put(FLD_TITLE, new String[]{FLD_TITLE_STORED,FLD_ALT_TITLE_STORED});
       HIGHLIGHT_FIELDS.put(FLD_USER, new String[]{FLD_USER_STORED});
       HIGHLIGHT_FIELDS.put(FLD_KEYWORDS, new String[]{FLD_TEXT_STORED,FLD_TITLE_STORED});
       HIGHLIGHT_FIELDS.put(FLD_PERSON_SURNAME, new String[]{FLD_FULLNAME_STORED,FLD_TITLE_STORED,FLD_ALTNAME_STORED});
