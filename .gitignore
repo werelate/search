@@ -1,7 +1,11 @@
 .idea/*
 *.iml
+bin/reindex.sh
 conf/scripts.conf
 conf/indexer.properties
+conf/logging.properties
+conf/reindexer.properties
 build/*
 dist/*
 classes/*
+logs
